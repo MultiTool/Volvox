@@ -2,20 +2,24 @@
 *.slo
 *.lo
 *.o
-*.obj
+obj/
 
 # Compiled Dynamic libraries
 *.so
 *.dylib
-*.dll
 
 # Compiled Static libraries
 *.lai
 *.la
 *.a
-*.lib
 
-# Executables
+# Executable
 *.exe
-*.out
-*.app
+bin/
+
+# Code Blocks junk
+*.depend
+*.cbTemp
+
+# Core dumps
+*.out 
