@@ -11,50 +11,14 @@
 #include <list>
 #include "Base.h"
 #include "FunSurf.h"
+#include "Link.h"
 
 #define WeightAmp 2.0;
 
 namespace IoType {
   enum IoType {Intra=0, GlobalIO=1, NbrIO=2};
 }
-/* ********************************************************************** */
-class Node;
-typedef Node *NodePtr;
 typedef std::vector<NodePtr> NodeVec;
-typedef double WeightType;
-/* ********************************************************************** */
-class Link;
-typedef Link *LinkPtr;
-class Link {
-public:
-  WeightType Weight;
-  double FireVal;
-  double Corrector;
-  NodePtr USNode,DSNode;
-  Link() {
-    this->FireVal=0.0;
-    this->USNode=NULL; this->DSNode=NULL;
-    Randomize_Weight();
-  }
-  ~Link() {
-    bool nop = true;
-  }
-  inline double GetFire() {
-    return this->FireVal*this->Weight;
-  }
-  inline double GetCorrector() {
-    return this->Corrector*this->Weight;
-  }
-  void Randomize_Weight(){
-    this->Weight = (frand()-0.5) * WeightAmp;// to do: do this with a distribution change
-  }
-  void Print_Me() {
-    printf("  Link ");
-    printf("USNode:%p, DSNode:%p ", this->USNode, this->DSNode);
-    printf("Weight:%lf \n", this->Weight);
-  }
-};
-typedef std::vector<LinkPtr> LinkVec;
 /* ********************************************************************** */
 class Node {
 public:
@@ -63,7 +27,6 @@ public:
   double Corrector;
   double LRate;
   double MinCorr, MaxCorr;
-  FunSurfGridPtr fsurf;
   /* ********************************************************************** */
   Node() {
     Init();
@@ -87,7 +50,12 @@ public:
   }
   /* ********************************************************************** */
   void Attach_FunSurf(FunSurfGridPtr fsurf0) {
-    this->fsurf = fsurf0;
+    LinkPtr lnk;
+    int cnt;
+    for (cnt=0; cnt<this->Working_Ins.size(); cnt++) {
+      lnk = this->Working_Ins.at(cnt);
+      lnk->Attach_FunSurf(fsurf0);
+    }
   }
   /* ********************************************************************** */
   void Collect_And_Fire() {
@@ -150,7 +118,7 @@ public:
     case TW::Surf :
       SurfParams[0] = ActFun(Corr/4.0);
       SurfParams[1] = MyFire;
-      this->Corrector = this->fsurf->Eval(SurfParams);
+      //this->Corrector = this->fsurf->Eval(SurfParams);// snox
       this->Corrector *= 4.0;
       break;
     }
@@ -177,9 +145,6 @@ public:
 //      ups = this->Working_Ins.at(cnt); SumSq += ups->FireVal * ups->FireVal;
       fire = this->Working_Ins.at(cnt)->FireVal;
       SumSq += fire * fire;
-    }
-    if (this->LRate==123.0){
-        bool nop = true;
     }
     for (int cnt=0; cnt<siz; cnt++) {
       ups = this->Working_Ins.at(cnt);
