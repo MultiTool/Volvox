@@ -40,6 +40,10 @@ public:
     }
   }
   /* ********************************************************************** */
+  void Connect_Self() {
+    this->Connect_Other_Cluster(this);
+  }
+  /* ********************************************************************** */
   void Connect_Other_Cluster(ClusterPtr upstreamer) {
     // Connect upstream cluster all-to-all to this one's inputs
     size_t siz0 = this->NodeList.size();
@@ -54,6 +58,8 @@ public:
       }
     }
   }
+  /* ********************************************************************** */
+  void Print_Specs(){}
   /* ********************************************************************** */
   void Set_Learning_Rate(double LRate) {
     NodePtr ndp;

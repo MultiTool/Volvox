@@ -7,7 +7,7 @@
 #include "FunSurf.h"
 #include "Node.h"
 #include "Cluster.h"
-#include "Stack.h"
+//#include "Stack.h"
 
 //#define popmax 1000
 #define popmax 100
@@ -26,7 +26,9 @@ public:
 
   //std::vector<std::array<double,2>> ScoreBuf;
   //double *ScoreBuf[2];
-  StackPtr BPNet;// crucible
+  ClusterPtr BPNet;// crucible
+  ClusterPtr Mirror;// Entorno
+  uint32_t ClusterSize = 10;
   uint32_t MaxNeuroGens = 2000;
   uint32_t DoneThresh = 32;//64; //32; //64;// 128;//16;
   double avgnumwinners = 0.0;
@@ -36,15 +38,17 @@ public:
   }
   /* ********************************************************************** */
   Pop(int popsize) {
-    BPNet = new Stack();
+    BPNet = new Cluster(ClusterSize);
+    BPNet->Randomize_Weights();
+
+    Mirror = new Cluster(ClusterSize);
+    Mirror->Randomize_Weights();
+
     LugarPtr lugar;
     Org *org;
     int pcnt;
-    if (false) {
-      BPNet->Create_Simple();
-    } else {
-      BPNet->Create_Any_Depth();
-    }
+    BPNet->Connect_Self();
+    Mirror->Connect_Self();
     this->popsz = popsize;
     forestv.resize(popsize);
     ScoreDexv.resize(popsize);
@@ -94,6 +98,7 @@ public:
     double ScoreBefore;
     double WinCnt;
     IOPairPtr Pair;
+    Mirror->Randomize_Weights();
     do {
       BPNet->Randomize_Weights();
       ScoreBefore = Dry_Run_Test(16, TSet);

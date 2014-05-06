@@ -4,7 +4,7 @@
 #include "FunSurf.h"
 #include "Node.h"
 #include "Cluster.h"
-#include "Stack.h"
+//#include "Stack.h"
 #include "Pop.h"
 
 using namespace std;
@@ -164,43 +164,6 @@ at least Shuffle each truth table.
     pop.Print_Sorted_Scores();
     return 0;
   }
-  double goal;
-  Stack stk;
-  stk.Create_Simple();
-
-  FunSurfGrid fs(2, 4);
-  fs.Create_Sigmoid_Deriv_Surface();
-  stk.Attach_FunSurf(&fs);
-
-  for (int gcnt=0; gcnt<numgens; gcnt++) {
-    num0 = BitInt::Bit2Int(gcnt, 0);
-    num1 = BitInt::Bit2Int(gcnt, 1);
-    in0 = BitInt::TransInt(num0);
-    in1 = BitInt::TransInt(num1);// in0 = TransBit(gcnt, 0); in1 = TransBit(gcnt, 1);
-    goal = BitInt::TransInt(num0 ^ num1);
-    stk.Load_Inputs(in0, in1, 1.0);
-    stk.Fire_Gen();
-    double fire = stk.OutLayer->NodeList.at(0)->FireVal;
-    if ((numgens-6)<gcnt) {
-      printf("gcnt:%li, ", gcnt);
-      printf("in0:%lf, in1:%lf, ", in0, in1);
-      printf("goal:%lf, fire:%lf, delta:%lf, ", goal, fire, goal-fire);
-    }
-    if ( (goal>0 && fire>0) || (goal<0 && fire<0) ) {
-      if ((numgens-6)<gcnt) { printf("Success!"); }
-    } else {
-      if ((numgens-6)<gcnt) { printf("Fail :( "); }
-      finalfail = gcnt;
-    }
-
-    stk.Backprop(goal);
-
-    if ((numgens-6)<gcnt) { printf("\n", fire); }
-  }
-  printf("\n");
-  fs.Print_Me(); printf("\n\n");
-  stk.Print_Me(); printf("\n");
-  printf("numgens:%li, finalfail:%li\n", numgens, finalfail);
   return 0;
 }
 
