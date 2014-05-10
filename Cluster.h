@@ -12,6 +12,30 @@ class Cluster {
 public:
   NodeVec NodeList;
   NodeVec *NodeListPtr;
+  /*
+Need a way to connect some nodes to mirror cluster.
+Not just normal connections, but for comparison and scoring.
+Could just make it 0 to N for both.
+
+What is the testing process?
+mirror fires all. main fires all. all main IO nodes compare value with mirror value. difference(?) goes to metanet.
+or, just mirror value goes to metanet. so every metanet (on link) can read value being transmitted.
+
+ok, so every metanet can read the raw fire passing through its own link.
+either just the mirror's node fire is copied back to the trainer net, or
+each trainer node has a seperate corrector/rawmirrorfire port, where it receives the value and passes it ONLY to the metanets. con:extra structural overhead.
+
+ok, so every metanet can simply be connected directly to every other metanet, at compile time.
+every metanet rides, reads and controls one inlink.
+
+is a listening post an array of nodes? each receives a metanet link without weight (1.0).
+
+a listening post:
+receives and sums inputs from outer firing nodes.
+allows other nodes to read those sums.
+an IO node sums its own input, then exchanges its fire with the fire of another.
+
+  */
   /* ********************************************************************** */
   Cluster() {
     NodeListPtr = &(NodeList);

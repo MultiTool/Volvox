@@ -32,43 +32,6 @@ need a quick translation from dimdex backward to real function input coord.
 
 */
 /* ********************************************************************** */
-void Test_Overflow() {
-  uint32_t siz = 100;
-  double ray[siz];
-  double sum = 0.0;
-  for (int cnt=0; cnt<siz; cnt++) {
-    //sum += ray[cnt] = frand();
-    sum += ray[cnt] = siz-cnt;
-  }
-  double sum1 = 0;
-  for (int cnt=0; cnt<siz; cnt++) {
-    //ray[cnt] /= sum;
-    ray[cnt] *= ((double)siz)/sum;
-    // printf("%lf, ", ray[cnt]);
-    //ray[cnt] = 0.25;
-    sum1+=ray[cnt];
-  }
-  for (int cnt=0; cnt<siz; cnt++) {
-    //printf("%lf, ", ray[cnt]);
-  }
-  int hitcnt = 0;
-  double val;
-  double KarmaSlush = 0.0;
-  for (int cnt=0; cnt<siz; cnt++) {
-    double rnd = frand();
-    val = ray[cnt];
-    //if (val<=0) {val+=1.0;}
-    if (rnd<val + KarmaSlush) {
-      KarmaSlush -= 1.0 - val;
-      hitcnt++;
-    } else {
-      KarmaSlush += val;
-    }
-    printf("rnd:%lf, val:%lf, hitcnt:%li, KarmaSlush:%lf\n", rnd, val, hitcnt, KarmaSlush);
-  }
-  printf("sum1:%lf\n ", sum1);
-}
-/* ********************************************************************** */
 const double uprecision = 1000000.0;
 double FullTime(struct timeval tm0) {// returns time in seconds and fractions of seconds
   return tm0.tv_sec + ((double)tm0.tv_usec)/uprecision;
@@ -89,7 +52,6 @@ void TimeCodeSample() {
 const uint32_t ndims = 2;
 int main() {
   srand(time(NULL));
-  // Test_Overflow(); return 0;
   if (false) {
     double alt;
     NumVec nv;
