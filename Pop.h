@@ -14,6 +14,16 @@
 //#define popmax 10
 
 /* ********************************************************************** */
+class Comper;
+typedef Comper *ComperPtr;
+class Comper {
+public:
+  NodePtr teacher, student;
+  double Compare() { // or score
+    return teacher->FireVal * student->FireVal;
+  }
+};
+/* ********************************************************************** */
 class Pop;
 typedef Pop *PopPtr;
 class Pop {
@@ -23,6 +33,7 @@ public:
   OrgVec ScoreDexv; // for sorting
   typedef struct ScorePair { double Score[2]; };
   std::vector<ScorePair> ScoreBuf;// for recording scores even after some creatures are dead
+  std::vector<ComperPtr> CompPairs;
 
   //std::vector<std::array<double,2>> ScoreBuf;
   //double *ScoreBuf[2];
@@ -49,6 +60,8 @@ public:
     int pcnt;
     BPNet->Connect_Self();
     Mirror->Connect_Self();
+    Attach_Mirror();
+
     this->popsz = popsize;
     forestv.resize(popsize);
     ScoreDexv.resize(popsize);
@@ -71,24 +84,41 @@ public:
       delete forestv.at(pcnt);
     }
     delete BPNet;
+    Clear_Compers();
   }
   /* ********************************************************************** */
-  double Dry_Run_Test(uint32_t MaxNeuroGens, TrainSetPtr TSet) {
-    uint32_t GenCnt;
-    double goal;
-    double WinCnt;
-    IOPairPtr Pair;
-    WinCnt=0.0;
-    for (GenCnt=0; GenCnt<MaxNeuroGens; GenCnt++) {
-      Pair = TSet->at(GenCnt%TSet->size());
-      goal = Pair->goalvec.at(0);
-      // BPNet->Load_Inputs(Pair->invec.at(0), Pair->invec.at(1), 1.0);
-      BPNet->Load_Inputs(&(Pair->invec));
-      BPNet->Fire_Gen();
-      double fire = BPNet->OutLayer->NodeList.at(0)->FireVal;
-      if (goal*fire>0) { WinCnt++; }
+  void Clear_Compers(){
+    for (size_t cnt=0;cnt<CompPairs.size();cnt++){
+      delete CompPairs.at(cnt);
     }
-    return WinCnt/((double)MaxNeuroGens);
+    CompPairs.clear();
+  }
+  /* ********************************************************************** */
+  void Attach_Mirror(){
+    size_t cnt;
+    size_t start = 0, finish = 0;
+    Clear_Compers();
+    NodePtr NodeUs, NodeDs;
+    for (cnt=start;cnt<finish;cnt++){
+      NodeUs = Mirror->NodeList.at(cnt);
+      NodeDs = BPNet->NodeList.at(cnt);
+      NodeDs->ConnectIn(NodeUs);
+      ComperPtr comp = new Comper();
+      comp->teacher = NodeUs; comp->student = NodeDs; //{ teacher = NodeUs, student = NodeDs };
+      CompPairs.push_back(comp);
+    }
+  }
+  /* ********************************************************************** */
+  double Compare_Outputs() {
+    ComperPtr comp;
+    double score = 1.0;
+    size_t siz = this->CompPairs.size();
+    size_t NCnt;
+    for (NCnt=0; NCnt<siz; NCnt++) {
+      comp = this->CompPairs.at(NCnt);
+      score *= 1.0 + comp->Compare();
+    }
+    return score;// this is a maybe. need to think it through more.
   }
   /* ********************************************************************** */
   void Run_Test(OrgPtr FSurf, TrainSetPtr TSet) {
@@ -99,23 +129,31 @@ public:
     double WinCnt;
     IOPairPtr Pair;
     Mirror->Randomize_Weights();
-    do {
-      BPNet->Randomize_Weights();
-      ScoreBefore = Dry_Run_Test(16, TSet);
-    } while (ScoreBefore==1.0);
+    BPNet->Randomize_Weights();
     BPNet->Attach_FunSurf(FSurf);
     WinCnt=0.0;
-    //MaxNeuroGens/=TSet->size();
     for (GenCnt=0; GenCnt<MaxNeuroGens; GenCnt++) {
-      //TSet->Shuffle();
-      //for (int paircnt=0; paircnt<TSet->size(); paircnt++) {
-      //Pair = TSet->at(paircnt);
       Pair = TSet->at(GenCnt%TSet->size());
 
       goal = Pair->goalvec.at(0);
       BPNet->Load_Inputs(&(Pair->invec));
       BPNet->Fire_Gen();
+      Mirror->Fire_Gen();
+      double Scoreish = Compare_Outputs();
+#if false
       double fire = BPNet->OutLayer->NodeList.at(0)->FireVal;
+      // how to judge performance? we need to observe the difference between the two outputs.
+      // the whole bignet needs a special list of all the talky nodes - JUST FOR JUDGEMENT. could be only a range of indexes, 0 to agun cosa
+      // comparison list could be owned by population, and not by either network.
+      // class comper?
+      /*
+      class comper{
+      pubic:
+        NodePtr teacher, student;
+        double Compare(){ // or score
+        }
+      }
+      */
       if (goal*fire>0) {
         WinCnt++;
       } else {
@@ -126,7 +164,7 @@ public:
       }
       // BPNet->Backprop(goal);
       BPNet->Backprop(&(Pair->goalvec));
-      //}
+#endif
     }
     double PrimaryScore = 0;
     if (FinalFail>=(MaxNeuroGens-DoneThresh)) {
