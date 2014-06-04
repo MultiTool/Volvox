@@ -21,7 +21,6 @@ class Link {
 public:
   WeightType Weight;
   double FireVal;
-  double Corrector;
   NodePtr USNode,DSNode;
   FunSurfGridPtr fsurf;
   /* ********************************************************************** */
@@ -35,9 +34,6 @@ public:
   /* ********************************************************************** */
   inline double GetFire() {
     return this->FireVal*this->Weight;
-  }
-  inline double GetCorrector() {
-    return this->Corrector*this->Weight;
   }
   void Randomize_Weight(){
     this->Weight = (frand()-0.5) * WeightAmp;// to do: do this with a distribution change

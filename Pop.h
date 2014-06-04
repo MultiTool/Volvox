@@ -19,8 +19,14 @@ typedef Comper *ComperPtr;
 class Comper {
 public:
   NodePtr teacher, student;
-  double Compare() { // or score
+  double CompareAnalog() { // or score
     return teacher->FireVal * student->FireVal;
+  }
+  double CompareDigital() {
+    double direction = teacher->FireVal * student->FireVal;
+    if (direction>0){return 1.0;}
+    if (direction<0){return -1.0;}
+    return 0.0;
   }
 };
 /* ********************************************************************** */
@@ -34,23 +40,19 @@ public:
   typedef struct ScorePair { double Score[2]; };
   std::vector<ScorePair> ScoreBuf;// for recording scores even after some creatures are dead
   std::vector<ComperPtr> CompPairs;
-
-  //std::vector<std::array<double,2>> ScoreBuf;
-  //double *ScoreBuf[2];
-  ClusterPtr BPNet;// crucible
+  ClusterPtr ClayNet;// crucible
   ClusterPtr Mirror;// Entorno
   uint32_t ClusterSize = 10;
   uint32_t MaxNeuroGens = 2000;
   uint32_t DoneThresh = 32;//64; //32; //64;// 128;//16;
   double avgnumwinners = 0.0;
-  TrainingSetList TrainingSets;
   /* ********************************************************************** */
   Pop() : Pop(popmax) {
   }
   /* ********************************************************************** */
   Pop(int popsize) {
-    BPNet = new Cluster(ClusterSize);
-    BPNet->Randomize_Weights();
+    ClayNet = new Cluster(ClusterSize);
+    ClayNet->Randomize_Weights();
 
     Mirror = new Cluster(ClusterSize);
     Mirror->Randomize_Weights();
@@ -58,7 +60,7 @@ public:
     LugarPtr lugar;
     Org *org;
     int pcnt;
-    BPNet->Connect_Self();
+    ClayNet->Connect_Self();
     Mirror->Connect_Self();
     Attach_Mirror();
 
@@ -66,7 +68,6 @@ public:
     forestv.resize(popsize);
     ScoreDexv.resize(popsize);
     ScoreBuf.resize(popsize);
-    //ScoreBuf = allocsafe()
     for (pcnt=0; pcnt<popsize; pcnt++) {
       lugar = new Lugar();
       org = Org::Abiogenate();
@@ -74,7 +75,6 @@ public:
       forestv.at(pcnt) = lugar;
       ScoreDexv.at(pcnt) = org;
     }
-    Init_Training_Sets();
   }
   /* ********************************************************************** */
   ~Pop() {
@@ -83,25 +83,25 @@ public:
     for (pcnt=0; pcnt<siz; pcnt++) {
       delete forestv.at(pcnt);
     }
-    delete BPNet;
+    delete ClayNet;
     Clear_Compers();
   }
   /* ********************************************************************** */
-  void Clear_Compers(){
-    for (size_t cnt=0;cnt<CompPairs.size();cnt++){
+  void Clear_Compers() {
+    for (size_t cnt=0; cnt<CompPairs.size(); cnt++) {
       delete CompPairs.at(cnt);
     }
     CompPairs.clear();
   }
   /* ********************************************************************** */
-  void Attach_Mirror(){
+  void Attach_Mirror() {
     size_t cnt;
     size_t start = 0, finish = 0;
     Clear_Compers();
     NodePtr NodeUs, NodeDs;
-    for (cnt=start;cnt<finish;cnt++){
+    for (cnt=start; cnt<finish; cnt++) {
       NodeUs = Mirror->NodeList.at(cnt);
-      NodeDs = BPNet->NodeList.at(cnt);
+      NodeDs = ClayNet->NodeList.at(cnt);
       NodeDs->ConnectIn(NodeUs);
       ComperPtr comp = new Comper();
       comp->teacher = NodeUs; comp->student = NodeDs; //{ teacher = NodeUs, student = NodeDs };
@@ -109,51 +109,44 @@ public:
     }
   }
   /* ********************************************************************** */
-  double Compare_Outputs() {
+  void Compare_Outputs(double *MajorScore, double *MinorScore) {
     ComperPtr comp;
-    double score = 1.0;
+    double score0 = 1.0;
+    double score1 = 1.0;
     size_t siz = this->CompPairs.size();
     size_t NCnt;
     for (NCnt=0; NCnt<siz; NCnt++) {
       comp = this->CompPairs.at(NCnt);
-      score *= 1.0 + comp->Compare();
+      score0 *= (1.0 + comp->CompareDigital())*0.5;
+      score1 *= (1.0 + comp->CompareAnalog())*0.5;
     }
-    return score;// this is a maybe. need to think it through more.
+    (*MajorScore) = score0; (*MinorScore) = score1;// this is a maybe. need to think it through more.
   }
   /* ********************************************************************** */
-  void Run_Test(OrgPtr FSurf, TrainSetPtr TSet) {
+  void Run_Test(OrgPtr FSurf) {
     uint32_t FinalFail = 0;
     uint32_t GenCnt;
     double goal;
+    double MajorScore, MinorScore;
     double ScoreBefore;
     double WinCnt;
     IOPairPtr Pair;
     Mirror->Randomize_Weights();
-    BPNet->Randomize_Weights();
-    BPNet->Attach_FunSurf(FSurf);
+    ClayNet->Randomize_Weights();
+    ClayNet->Attach_FunSurf(FSurf);
     WinCnt=0.0;
     for (GenCnt=0; GenCnt<MaxNeuroGens; GenCnt++) {
-      Pair = TSet->at(GenCnt%TSet->size());
-
-      goal = Pair->goalvec.at(0);
-      BPNet->Load_Inputs(&(Pair->invec));
-      BPNet->Fire_Gen();
+      ClayNet->Fire_Gen();
       Mirror->Fire_Gen();
-      double Scoreish = Compare_Outputs();
+      Compare_Outputs(&MajorScore, &MinorScore);
+      FSurf->Score[0]=MajorScore;
+      FSurf->Score[1]=MinorScore;
 #if false
-      double fire = BPNet->OutLayer->NodeList.at(0)->FireVal;
+      double fire = ClayNet->OutLayer->NodeList.at(0)->FireVal;
       // how to judge performance? we need to observe the difference between the two outputs.
       // the whole bignet needs a special list of all the talky nodes - JUST FOR JUDGEMENT. could be only a range of indexes, 0 to agun cosa
       // comparison list could be owned by population, and not by either network.
       // class comper?
-      /*
-      class comper{
-      pubic:
-        NodePtr teacher, student;
-        double Compare(){ // or score
-        }
-      }
-      */
       if (goal*fire>0) {
         WinCnt++;
       } else {
@@ -162,8 +155,8 @@ public:
       if ((GenCnt-FinalFail)>DoneThresh) {
         break;
       }
-      // BPNet->Backprop(goal);
-      BPNet->Backprop(&(Pair->goalvec));
+      // ClayNet->Backprop(goal);
+      ClayNet->Backprop(&(Pair->goalvec));
 #endif
     }
     double PrimaryScore = 0;
@@ -197,29 +190,16 @@ public:
     uint32_t pcnt;
     LugarPtr place;
     int numwinners;
-    int tcnt;
-    tcnt = gencnt % TrainingSets.size();
     printf("Pop.Gen(), ");
-    //printf(" tcnt:%li, tcnt:%s\n", tcnt, TrainingSets.at(tcnt)->Name);
     printf("\n");
-    this->BPNet->Print_Specs();
+    this->ClayNet->Print_Specs();
     for (pcnt=0; pcnt<popsize; pcnt++) {
       lugar = forestv[pcnt];
       candidate = lugar->tenant;
       candidate->Clear_Score();
       candidate->Oneify_Score();
-      // this->Run_Test(candidate);
-      for (tcnt=0; tcnt<TrainingSets.size(); tcnt++) {
-        //TrainingSets.at(tcnt)->Shuffle();
-        this->Run_Test(candidate, TrainingSets.at(tcnt));
-        //if (tcnt==1){ numwinners = NumWinners(); }
-      }
-      //fred = candidate->Score[0]; printf("fred:%lf\n", fred);
-      //candidate->Rescale_Score(1.0/((double)TrainingSets.size()));
-
-      //fred = candidate->Score[0]; printf("fred:%lf\n", fred);
+      this->Run_Test(candidate);
       // printf("candidate->Score:%lf, %lf\n", candidate->Score[0], candidate->Score[1]);
-      bool nop = true;
     }
     double SurvivalRate = 0.5;
     Sort();
@@ -233,7 +213,6 @@ public:
     printf("bestbeast->Score:%lf, %lf\n", bestbeast->Score[0], bestbeast->Score[1]);
     printf("avgbeast Score:%lf, numwinners:%li, avgnumwinners:%lf\n", avgbeast, numwinners, avgnumwinners);
     printf("leastbeast->Score:%lf, %lf\n", leastbeast->Score[0], leastbeast->Score[1]);
-    printf("TrainingSets:%li, TrainWay:%s, DoneThresh:%li\n", TrainingSets.size(), TW::TrainWayNames[TW::TrainWay], DoneThresh);
     if (Org::Baselining) {
       printf("Baselining, NO MUTATION \n");// coasting, no evo
     } else {
@@ -365,111 +344,6 @@ public:
       org->Compile_Me();
     }
   }
-  /* ********************************************************************** */
-  void Init_Training_Sets() {
-    TrainSetPtr tset;
-    IOPairPtr match;
-    TrainingSets.All_Truth(2);
-    return;
-    tset = new TrainSet(); TrainingSets.push_back(tset);
-    { // first XOR
-      strcpy(tset->Name, "XOR");
-      match = new IOPair(); tset->push_back(match);
-      match->invec.push_back(1.0); match->invec.push_back(-1.0); match->invec.push_back(-1.0); match->goalvec.push_back(-1.0);
-
-      match = new IOPair(); tset->push_back(match);
-      match->invec.push_back(1.0); match->invec.push_back(-1.0); match->invec.push_back( 1.0); match->goalvec.push_back( 1.0);
-
-      match = new IOPair(); tset->push_back(match);
-      match->invec.push_back(1.0); match->invec.push_back( 1.0); match->invec.push_back(-1.0); match->goalvec.push_back( 1.0);
-
-      match = new IOPair(); tset->push_back(match);
-      match->invec.push_back(1.0); match->invec.push_back( 1.0); match->invec.push_back( 1.0); match->goalvec.push_back(-1.0);
-    }
-    //return;
-
-    tset = new TrainSet(); TrainingSets.push_back(tset);
-    { // AND
-      strcpy(tset->Name, "AND");
-      match = new IOPair(); tset->push_back(match);
-      match->invec.push_back(1.0); match->invec.push_back(-1.0); match->invec.push_back(-1.0); match->goalvec.push_back(-1.0);
-
-      match = new IOPair(); tset->push_back(match);
-      match->invec.push_back(1.0); match->invec.push_back(-1.0); match->invec.push_back( 1.0); match->goalvec.push_back(-1.0);
-
-      match = new IOPair(); tset->push_back(match);
-      match->invec.push_back(1.0); match->invec.push_back( 1.0); match->invec.push_back(-1.0); match->goalvec.push_back(-1.0);
-
-      match = new IOPair(); tset->push_back(match);
-      match->invec.push_back(1.0); match->invec.push_back( 1.0); match->invec.push_back( 1.0); match->goalvec.push_back( 1.0);
-    }
-    //return;
-
-    tset = new TrainSet(); TrainingSets.push_back(tset);
-    { // OR
-      strcpy(tset->Name, "OR");
-      match = new IOPair(); tset->push_back(match);
-      match->invec.push_back(1.0); match->invec.push_back(-1.0); match->invec.push_back(-1.0); match->goalvec.push_back(-1.0);
-
-      match = new IOPair(); tset->push_back(match);
-      match->invec.push_back(1.0); match->invec.push_back(-1.0); match->invec.push_back( 1.0); match->goalvec.push_back( 1.0);
-
-      match = new IOPair(); tset->push_back(match);
-      match->invec.push_back(1.0); match->invec.push_back( 1.0); match->invec.push_back(-1.0); match->goalvec.push_back( 1.0);
-
-      match = new IOPair(); tset->push_back(match);
-      match->invec.push_back(1.0); match->invec.push_back( 1.0); match->invec.push_back( 1.0); match->goalvec.push_back( 1.0);
-    }
-
-    tset = new TrainSet(); TrainingSets.push_back(tset);
-    { // NXOR
-      strcpy(tset->Name, "NXOR");
-      match = new IOPair(); tset->push_back(match);
-      match->invec.push_back(1.0); match->invec.push_back(-1.0); match->invec.push_back(-1.0); match->goalvec.push_back( 1.0);
-
-      match = new IOPair(); tset->push_back(match);
-      match->invec.push_back(1.0); match->invec.push_back(-1.0); match->invec.push_back( 1.0); match->goalvec.push_back(-1.0);
-
-      match = new IOPair(); tset->push_back(match);
-      match->invec.push_back(1.0); match->invec.push_back( 1.0); match->invec.push_back(-1.0); match->goalvec.push_back(-1.0);
-
-      match = new IOPair(); tset->push_back(match);
-      match->invec.push_back(1.0); match->invec.push_back( 1.0); match->invec.push_back( 1.0); match->goalvec.push_back( 1.0);
-    }
-    //return;
-
-    tset = new TrainSet(); TrainingSets.push_back(tset);
-    { // NAND
-      strcpy(tset->Name, "NAND");
-      match = new IOPair(); tset->push_back(match);
-      match->invec.push_back(1.0); match->invec.push_back(-1.0); match->invec.push_back(-1.0); match->goalvec.push_back( 1.0);
-
-      match = new IOPair(); tset->push_back(match);
-      match->invec.push_back(1.0); match->invec.push_back(-1.0); match->invec.push_back( 1.0); match->goalvec.push_back( 1.0);
-
-      match = new IOPair(); tset->push_back(match);
-      match->invec.push_back(1.0); match->invec.push_back( 1.0); match->invec.push_back(-1.0); match->goalvec.push_back( 1.0);
-
-      match = new IOPair(); tset->push_back(match);
-      match->invec.push_back(1.0); match->invec.push_back( 1.0); match->invec.push_back( 1.0); match->goalvec.push_back(-1.0);
-    }
-    tset = new TrainSet(); TrainingSets.push_back(tset);
-    { // NOR
-      strcpy(tset->Name, "NOR");
-      match = new IOPair(); tset->push_back(match);
-      match->invec.push_back(1.0); match->invec.push_back(-1.0); match->invec.push_back(-1.0); match->goalvec.push_back( 1.0);
-
-      match = new IOPair(); tset->push_back(match);
-      match->invec.push_back(1.0); match->invec.push_back(-1.0); match->invec.push_back( 1.0); match->goalvec.push_back(-1.0);
-
-      match = new IOPair(); tset->push_back(match);
-      match->invec.push_back(1.0); match->invec.push_back( 1.0); match->invec.push_back(-1.0); match->goalvec.push_back(-1.0);
-
-      match = new IOPair(); tset->push_back(match);
-      match->invec.push_back(1.0); match->invec.push_back( 1.0); match->invec.push_back( 1.0); match->goalvec.push_back(-1.0);
-    }
-  }
-
 };
 
 #endif // POP_H_INCLUDED

@@ -2,25 +2,27 @@
 #define ORG_H_INCLUDED
 
 #include "Base.h"
-#include "FunSurf.h"
+#include "Cluster.h"
+//#include "FunSurf.h"
 
 /* ********************************************************************** */
 class Org;
 typedef Org *OrgPtr;
 typedef std::vector<OrgPtr> OrgVec;
-class Org : public FunSurfGrid {
+//class Org : public FunSurfGrid{
+class Org : public Cluster {
 public:
   const static int NumScores = 2;
   double Score[NumScores];
   uint32_t FinalFail;
   struct Lugar *home;// my location
   static const bool Baselining = false;
-
   /* ********************************************************************** */
-  Org() : Org(2, 4) {
+  Org() {
   }
   /* ********************************************************************** */
-  Org(uint32_t NumDims0, uint32_t Rez0) : FunSurfGrid(NumDims0, Rez0) {
+  //Org(uint32_t NumDims0, uint32_t Rez0) : FunSurfGrid(NumDims0, Rez0) {
+  Org(uint32_t NumDims0, uint32_t Rez0) : Cluster() {
     for (int cnt=0; cnt<NumScores; cnt++) {
       this->Score[cnt] = 0.0;
     }
@@ -34,44 +36,27 @@ public:
   static OrgPtr Abiogenate() {
     OrgPtr org = new Org();
     org->Rand_Init();
-    if (Baselining) {
-      //org->Create_Sigmoid_Deriv_Surface();// snox for testing
-      org->Create_Seed_Surface();// snox for testing
+    if (Baselining) {// snox for testing
     }
     return org;
   }
   /* ********************************************************************** */
   void Rand_Init() {
-    double MutAmp = 2.0;
-    double HalfAmp = MutAmp/2.0;
-    uint32_t siz = this->NumCells;
-    uint32_t cnt;
-    for (cnt=0; cnt<siz; cnt++) {
-      Space[cnt] = frand()*MutAmp-HalfAmp;
-    }
+    this->Fill_With_Nodes(10);
+    this->Randomize_Weights();
   }
   /* ********************************************************************** */
   void Mutate_Me(double MRate) {
     if (Baselining) {return;}
     double MutAmp = 0.01;
     double HalfAmp = MutAmp/2.0;
-    uint32_t siz = this->NumCells;
+    uint32_t siz = this->NodeList.size();
     uint32_t cnt;
-    for (cnt=0; cnt<siz; cnt++) {
-      if (frand()<MRate) {
-        Space[cnt] += frand()*MutAmp-HalfAmp;
-      }
-    }
   }
   /* ********************************************************************** */
   OrgPtr Spawn() {
     OrgPtr child;
-    uint32_t siz = this->NumCells;
-    child = new Org(this->NumDims, this->Rez);
-    uint32_t cnt;
-    for (cnt=0; cnt<siz; cnt++) {
-      child->Space[cnt] = this->Space[cnt];
-    }
+    child = new Org();
     return child;
   }
   /* ********************************************************************** */

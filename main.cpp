@@ -9,28 +9,6 @@
 
 using namespace std;
 
-/*
-next
-get real stats on
-percent of times corr squish works with depth of 30 (-5) clusters
-percent of times corr classic works with depth of 30 (-5) clusters
-
-how steep a squish helps, and how steep hurts.
-
-get stats on fail rate of 100 (-5) classic vs squish.
-
-next
-create 2d funsurf, program it with whole field of corrector * sigderiv, plug it into the network.
-use on tiny network.
-
-ways to burn function into funsurf:
-pass back a pointer to the function. not great for unknown number of variables. would need an array parameter.
-hard code (paste) sigderiv function into funsurf - hacky but easy. do this.
-put sig deriv function at base of dependencies. meh, doesn't belong at base.
-
-need a quick translation from dimdex backward to real function input coord.
-
-*/
 /* ********************************************************************** */
 const double uprecision = 1000000.0;
 double FullTime(struct timeval tm0) {// returns time in seconds and fractions of seconds
@@ -122,7 +100,7 @@ at least Shuffle each truth table.
       printf(" HoursPassed:%lf, MinutesPassed:%lf, SecondsPassed:%lf\n", HoursPassed, MinutesPassed, SecondsPassed);
       //printf(" HoursPassed:%lf, SecondsPassed:%lf\n", HoursPassed, SecondsPassed);
     }
-    //pop.BPNet->Print_Me();
+    //pop.ClayNet->Print_Me();
     pop.Print_Sorted_Scores();
     return 0;
   }

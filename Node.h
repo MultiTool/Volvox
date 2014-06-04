@@ -1,3 +1,4 @@
+#pragma once
 #ifndef NODE_H_INCLUDED
 #define NODE_H_INCLUDED
 
@@ -12,6 +13,7 @@
 #include "Base.h"
 #include "FunSurf.h"
 #include "Link.h"
+#include "Org.h"
 
 #define WeightAmp 2.0;
 
@@ -24,7 +26,6 @@ class Node {
 public:
   LinkVec Working_Ins, Working_Outs;
   double RawFire, FireVal, PrevFire;
-  double Corrector;
   double LRate;
   double MinCorr, MaxCorr;
   /* ********************************************************************** */
@@ -49,7 +50,7 @@ public:
     MaxCorr = INT32_MIN;
   }
   /* ********************************************************************** */
-  void Attach_FunSurf(FunSurfGridPtr fsurf0) {
+  void Attach_FunSurf(OrgPtr fsurf0) {
     LinkPtr lnk;
     int cnt;
     for (cnt=0; cnt<this->Working_Ins.size(); cnt++) {
@@ -84,72 +85,6 @@ public:
     for (int cnt=0; cnt<siz; cnt++) {
       downs = this->Working_Outs.at(cnt);
       downs->FireVal = MyFire;
-    }
-  }
-  /* ********************************************************************** */
-  void Push_Correctors_Backward() {
-    LinkPtr ups;
-    size_t siz = this->Working_Ins.size();
-    for (int cnt=0; cnt<siz; cnt++) {
-      ups = this->Working_Ins.at(cnt);
-      ups->Corrector = this->Corrector;
-    }
-  }
-  /* ********************************************************************** */
-  void Pull_Correctors() {
-    double ClipRad = 20.0;
-    LinkPtr downs;
-    double Corr, TestCorr;
-    double SurfParams[2];
-    double MyFire=this->FireVal;
-    double Fire_Deriv = 0.0;
-    Corr = 0.0;
-    size_t siz = this->Working_Outs.size();
-    for (int cnt=0; cnt<siz; cnt++) {
-      downs = this->Working_Outs.at(cnt);
-      Corr += downs->GetCorrector();
-      TestCorr += downs->GetCorrector();
-    }
-    switch (TW::TrainWay) {
-    case TW::Classic :
-      Fire_Deriv = sigmoid_deriv_postfire(MyFire);
-      this->Corrector = Fire_Deriv * Corr;
-      break;
-    case TW::Surf :
-      SurfParams[0] = ActFun(Corr/4.0);
-      SurfParams[1] = MyFire;
-      //this->Corrector = this->fsurf->Eval(SurfParams);// snox
-      this->Corrector *= 4.0;
-      break;
-    }
-
-    if (MinCorr>TestCorr) {
-      MinCorr = TestCorr;
-    }
-    if (MaxCorr<TestCorr) {
-      MaxCorr = TestCorr;
-    }
-  }
-  /* ********************************************************************** */
-  void Apply_Corrector(double CorrDelta) {
-    LinkPtr ups;
-    double num, fire;
-    double ModCorrDelta = CorrDelta * this->LRate;
-    size_t siz = this->Working_Ins.size();
-    /*
-    first we get the whole input vector and unitize it (sum of squares?). that becomes the recognition vector.
-    then mult the recog vector by the corrector (and by lrate) and add it to my input weights.
-    */
-    double SumSq=0.0;
-    for (int cnt=0; cnt<siz; cnt++) {
-//      ups = this->Working_Ins.at(cnt); SumSq += ups->FireVal * ups->FireVal;
-      fire = this->Working_Ins.at(cnt)->FireVal;
-      SumSq += fire * fire;
-    }
-    for (int cnt=0; cnt<siz; cnt++) {
-      ups = this->Working_Ins.at(cnt);
-      num = ups->FireVal / SumSq;
-      ups->Weight += num * ModCorrDelta;
     }
   }
   /* ********************************************************************** */

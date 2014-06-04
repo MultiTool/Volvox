@@ -1,8 +1,8 @@
+#pragma once
 #ifndef CLUSTER_H_INCLUDED
 #define CLUSTER_H_INCLUDED
 
 #include "Node.h"
-#include "TrainingSets.h"
 
 /* ********************************************************************** */
 class Cluster;
@@ -93,7 +93,7 @@ an IO node sums its own input, then exchanges its fire with the fire of another.
     }
   }
   /* ********************************************************************** */
-  void Attach_FunSurf(FunSurfGridPtr fsurf0) {
+  void Attach_FunSurf(OrgPtr fsurf0) {
     NodePtr ndp;
     for (int ncnt=0; ncnt<this->NodeList.size(); ncnt++) {
       ndp = this->NodeList.at(ncnt);
@@ -129,36 +129,6 @@ an IO node sums its own input, then exchanges its fire with the fire of another.
     Collect_And_Fire();
   }
   /* ********************************************************************** */
-  void Push_Correctors_Backward() {
-    NodePtr ndp;
-    int cnt;
-    size_t siz = this->NodeList.size();
-    for (cnt=0; cnt<siz; cnt++) {
-      ndp = this->NodeList.at(cnt);
-      ndp->Push_Correctors_Backward();
-    }
-  }
-  /* ********************************************************************** */
-  void Pull_Correctors() {
-    NodePtr ndp;
-    int cnt;
-    size_t siz = this->NodeList.size();
-    for (cnt=0; cnt<siz; cnt++) {
-      ndp = this->NodeList.at(cnt);
-      ndp->Pull_Correctors();
-    }
-  }
-  /* ********************************************************************** */
-  void Apply_Correctors() {
-    NodePtr ndp;
-    int cnt;
-    size_t siz = this->NodeList.size();
-    for (cnt=0; cnt<siz; cnt++) {
-      ndp = this->NodeList.at(cnt);
-      ndp->Apply_Corrector(ndp->Corrector);
-    }
-  }
-  /* ********************************************************************** */
   void Randomize_Weights() {
     NodePtr ndp;
     size_t cnt;
@@ -188,18 +158,6 @@ an IO node sums its own input, then exchanges its fire with the fire of another.
     if (siz<this->NodeList.size()) { siz = this->NodeList.size(); }
     for (size_t cnt=0; cnt<siz; cnt++) {
       this->NodeList.at(cnt)->FireVal = invec->at(cnt);
-    }
-  }
-  /* ********************************************************************** */
-  void Load_Correctors(std::vector<double> *goalvec) {
-    size_t siz = goalvec->size();
-    if (siz<this->NodeList.size()) { siz = this->NodeList.size(); }
-    double FireVal;
-    NodePtr node;
-    for (size_t cnt=0; cnt<siz; cnt++) {
-      node = this->NodeList.at(cnt);
-      FireVal = node->FireVal;
-      node->Corrector = goalvec->at(cnt)-FireVal;
     }
   }
 };
