@@ -13,7 +13,7 @@
 #include "Base.h"
 #include "FunSurf.h"
 #include "Link.h"
-#include "Org.h"
+#include "OrgProto.h"
 
 #define WeightAmp 2.0;
 
@@ -50,7 +50,7 @@ public:
     MaxCorr = INT32_MIN;
   }
   /* ********************************************************************** */
-  void Attach_FunSurf(OrgPtr fsurf0) {
+  void Attach_FunSurf(OrgProtoPtr fsurf0) {
     LinkPtr lnk;
     int cnt;
     for (cnt=0; cnt<this->Working_Ins.size(); cnt++) {

@@ -10,8 +10,8 @@ typedef std::vector<LugarPtr> LugarVec;
 class Lugar {
 // private:
 public:
-  Org *tenant;
-  Org *tenant_next;
+  OrgPtr tenant;
+  OrgPtr tenant_next;
   uint32_t numnbrs;
   LugarPtr *nbrs;// array of nbrs for whatever topology
   LugarVec nbrsv;

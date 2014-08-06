@@ -129,9 +129,7 @@ public:
     double goal;
     double MajorScore, MinorScore;
     double ScoreBefore;
-    double WinCnt;
-    IOPairPtr Pair;
-    Mirror->Randomize_Weights();
+    double WinCnt;    Mirror->Randomize_Weights();
     ClayNet->Randomize_Weights();
     ClayNet->Attach_FunSurf(FSurf);
     WinCnt=0.0;

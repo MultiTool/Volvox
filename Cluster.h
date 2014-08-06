@@ -1,17 +1,41 @@
-#pragma once
+/*
+
+dependencies:
+Base.h
+
+FunSurf.h  - so here, we need a basic prototype/iface of org.
+
+Link.h --> problem is depends on Org.h
+Node.h
+Cluster.h
+Org.h
+      Lugar.h
+Pop.h
+
+Stack.h
+TrainingSets.h
+*/
+
+//#pragma once
 #ifndef CLUSTER_H_INCLUDED
 #define CLUSTER_H_INCLUDED
 
 #include "Node.h"
-
+//#include "Org.h"
+/*
+class Org;
+typedef Org *OrgPtr;
+*/
 /* ********************************************************************** */
+//class NodeVec;
+//class OrgPtr;
 class Cluster;
 typedef Cluster *ClusterPtr;
 typedef std::vector<ClusterPtr> ClusterVec;
 class Cluster {
 public:
-  NodeVec NodeList;
   NodeVec *NodeListPtr;
+  NodeVec NodeList;
   /*
 Need a way to connect some nodes to mirror cluster.
 Not just normal connections, but for comparison and scoring.
@@ -93,7 +117,7 @@ an IO node sums its own input, then exchanges its fire with the fire of another.
     }
   }
   /* ********************************************************************** */
-  void Attach_FunSurf(OrgPtr fsurf0) {
+  void Attach_FunSurf(OrgProtoPtr fsurf0) {
     NodePtr ndp;
     for (int ncnt=0; ncnt<this->NodeList.size(); ncnt++) {
       ndp = this->NodeList.at(ncnt);

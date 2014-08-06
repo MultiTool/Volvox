@@ -3,14 +3,15 @@
 
 #include "Base.h"
 #include "Cluster.h"
-//#include "FunSurf.h"
+#include "FunSurf.h"
+#include "OrgProto.h"
 
 /* ********************************************************************** */
 class Org;
 typedef Org *OrgPtr;
 typedef std::vector<OrgPtr> OrgVec;
 //class Org : public FunSurfGrid{
-class Org : public Cluster {
+class Org : public Cluster, public OrgProto {
 public:
   const static int NumScores = 2;
   double Score[NumScores];
@@ -81,9 +82,9 @@ public:
     }
   }
   /* ********************************************************************** */
-//  void Print_Me() override {
-//    printf("Org\n");
-//  }
+  void Print_Me() override {
+    printf("Org\n");
+  }
   /* ********************************************************************** */
   void Print_Score() {
     printf(" Score:%lf, %lf\n", this->Score[0], this->Score[1]);

@@ -41,6 +41,7 @@
 		<Unit filename="Lugar.h" />
 		<Unit filename="Node.h" />
 		<Unit filename="Org.h" />
+		<Unit filename="OrgProto.h" />
 		<Unit filename="Pop.h" />
 		<Unit filename="main.cpp" />
 		<Extensions>

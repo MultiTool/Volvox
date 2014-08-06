@@ -8,6 +8,7 @@
 #include "Base.h"
 #include "FunSurf.h"
 #include "Node.h"
+#include "OrgProto.h"
 
 #define WeightAmp 2.0;
 typedef double WeightType;
@@ -22,7 +23,7 @@ public:
   WeightType Weight;
   double FireVal;
   NodePtr USNode,DSNode;
-  FunSurfGridPtr fsurf;
+  OrgProtoPtr fsurf;
   /* ********************************************************************** */
   Link() {
     this->FireVal=0.0;
@@ -39,7 +40,7 @@ public:
     this->Weight = (frand()-0.5) * WeightAmp;// to do: do this with a distribution change
   }
   /* ********************************************************************** */
-  void Attach_FunSurf(FunSurfGridPtr fsurf0) {
+  void Attach_FunSurf(OrgProtoPtr fsurf0) {
     this->fsurf = fsurf0;
   }
   /* ********************************************************************** */
