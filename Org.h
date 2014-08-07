@@ -13,6 +13,8 @@ typedef std::vector<OrgPtr> OrgVec;
 //class Org : public FunSurfGrid{
 class Org : public Cluster, public OrgProto {
 public:
+  //LinkProtoPtr My_Link;
+  LinkPtr My_Link;
   const static int NumScores = 2;
   double Score[NumScores];
   uint32_t FinalFail;
@@ -91,7 +93,6 @@ public:
   }
   /* ********************************************************************** */
   int Compare_Score(OrgPtr other) {
-    //double left, right;
     int cnt = 0;
     double *ScoreMe, *ScoreYou;
     ScoreMe=this->Score; ScoreYou=other->Score;
@@ -101,6 +102,18 @@ public:
       cnt++;
     }
     return 0;
+  }
+  /* ********************************************************************** */
+  void Attach_Link(LinkPtr lnk) override {
+    My_Link = lnk;
+  }
+  /* ********************************************************************** */
+  void Run_Cycle() override {
+    double Fire = My_Link->FireVal;// I can read this
+    double Weight = My_Link->Weight;// but only write to this
+    NodePtr USNode, DSNode;
+    USNode = My_Link->USNode;
+    DSNode = My_Link->DSNode;
   }
 };
 

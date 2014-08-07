@@ -56,6 +56,7 @@ public:
     for (cnt=0; cnt<this->Working_Ins.size(); cnt++) {
       lnk = this->Working_Ins.at(cnt);
       lnk->Attach_FunSurf(fsurf0);
+      fsurf0->Attach_Link(lnk);
     }
   }
   /* ********************************************************************** */
@@ -111,6 +112,16 @@ public:
     for (int cnt=0; cnt<siz; cnt++) {
       ups = this->Working_Ins.at(cnt);
       ups->Randomize_Weight();
+    }
+  }
+  /* ********************************************************************** */
+  void Adapt_Weights() {
+    LinkPtr ups;
+    Init();// clear metrics, etc.
+    size_t siz = this->Working_Ins.size();
+    for (int cnt=0; cnt<siz; cnt++) {
+      ups = this->Working_Ins.at(cnt);
+      ups->Adapt_Weight();
     }
   }
   /* ********************************************************************** */

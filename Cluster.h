@@ -163,6 +163,16 @@ an IO node sums its own input, then exchanges its fire with the fire of another.
     }
   }
   /* ********************************************************************** */
+  void Adapt_Weights() {
+    NodePtr ndp;
+    size_t cnt;
+    size_t siz = this->NodeList.size();
+    for (cnt=0; cnt<siz; cnt++) {
+      ndp = this->NodeList.at(cnt);
+      ndp->Adapt_Weights();
+    }
+  }
+  /* ********************************************************************** */
   void Print_Me(int ClusterNum) {
     size_t cnt;
     NodePtr ndp;

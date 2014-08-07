@@ -11,19 +11,18 @@
 #include "OrgProto.h"
 
 #define WeightAmp 2.0;
-typedef double WeightType;
 
 class Node;
 typedef Node *NodePtr;
 /* ********************************************************************** */
 class Link;
 typedef Link *LinkPtr;
-class Link {
+class Link {//} : public LinkProto {;
 public:
-  WeightType Weight;
-  double FireVal;
+  typedef double WeightType;
+  WeightType Weight; double FireVal;
   NodePtr USNode,DSNode;
-  OrgProtoPtr fsurf;
+  OrgProtoPtr My_Org;
   /* ********************************************************************** */
   Link() {
     this->FireVal=0.0;
@@ -40,8 +39,13 @@ public:
     this->Weight = (frand()-0.5) * WeightAmp;// to do: do this with a distribution change
   }
   /* ********************************************************************** */
-  void Attach_FunSurf(OrgProtoPtr fsurf0) {
-    this->fsurf = fsurf0;
+  void Adapt_Weight() {
+    My_Org->Run_Cycle();
+  }
+  /* ********************************************************************** */
+  void Attach_FunSurf(OrgProtoPtr Org0) {
+    this->My_Org = Org0;
+    Org0->Attach_Link(this);
   }
   /* ********************************************************************** */
   void Print_Me() {

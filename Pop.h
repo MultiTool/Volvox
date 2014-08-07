@@ -41,7 +41,7 @@ public:
   std::vector<ScorePair> ScoreBuf;// for recording scores even after some creatures are dead
   std::vector<ComperPtr> CompPairs;
   ClusterPtr ClayNet;// crucible
-  ClusterPtr Mirror;// Entorno
+  ClusterPtr Entorno;// Entorno
   uint32_t ClusterSize = 10;
   uint32_t MaxNeuroGens = 2000;
   uint32_t DoneThresh = 32;//64; //32; //64;// 128;//16;
@@ -54,15 +54,15 @@ public:
     ClayNet = new Cluster(ClusterSize);
     ClayNet->Randomize_Weights();
 
-    Mirror = new Cluster(ClusterSize);
-    Mirror->Randomize_Weights();
+    Entorno = new Cluster(ClusterSize);
+    Entorno->Randomize_Weights();
 
     LugarPtr lugar;
     Org *org;
     int pcnt;
     ClayNet->Connect_Self();
-    Mirror->Connect_Self();
-    Attach_Mirror();
+    Entorno->Connect_Self();
+    Attach_Entorno();
 
     this->popsz = popsize;
     forestv.resize(popsize);
@@ -94,13 +94,13 @@ public:
     CompPairs.clear();
   }
   /* ********************************************************************** */
-  void Attach_Mirror() {
+  void Attach_Entorno() {
     size_t cnt;
     size_t start = 0, finish = 0;
     Clear_Compers();
     NodePtr NodeUs, NodeDs;
     for (cnt=start; cnt<finish; cnt++) {
-      NodeUs = Mirror->NodeList.at(cnt);
+      NodeUs = Entorno->NodeList.at(cnt);
       NodeDs = ClayNet->NodeList.at(cnt);
       NodeDs->ConnectIn(NodeUs);
       ComperPtr comp = new Comper();
@@ -129,16 +129,16 @@ public:
     double goal;
     double MajorScore, MinorScore;
     double ScoreBefore;
-    double WinCnt;    Mirror->Randomize_Weights();
+    double WinCnt;
+    Entorno->Randomize_Weights();
     ClayNet->Randomize_Weights();
     ClayNet->Attach_FunSurf(FSurf);
     WinCnt=0.0;
     for (GenCnt=0; GenCnt<MaxNeuroGens; GenCnt++) {
       ClayNet->Fire_Gen();
-      Mirror->Fire_Gen();
+      Entorno->Fire_Gen();
       Compare_Outputs(&MajorScore, &MinorScore);
-      FSurf->Score[0]=MajorScore;
-      FSurf->Score[1]=MinorScore;
+      FSurf->Score[0]=MajorScore; FSurf->Score[1]=MinorScore;
 #if false
       double fire = ClayNet->OutLayer->NodeList.at(0)->FireVal;
       // how to judge performance? we need to observe the difference between the two outputs.
