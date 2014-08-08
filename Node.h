@@ -15,11 +15,35 @@
 #include "Link.h"
 #include "OrgProto.h"
 
+/*
+need to define 3 node classes:
+
+base class, can connect, fire, etc.
+Node_Micro: mutates, plugs in to meeting posts, doesn't own any meeting posts.
+Node_Macro: never mutates, owns a meeting post, does not plug in to anything (except Entorno nodes maybe, but no flag needed)
+
+Node_Mega?
+
+when an org is created, it creates and owns MicroNodes.
+when Entorno and ClayNet are created, they create and own MegaNodes.
+therefore, different create/populate fns for each.
+
+also 2 link classes?
+MegaLink: owns an org
+MicroLink: does not own an org
+
+problem with 2 types of links, node base class can't have its own lists of links, UNLESS the base lists are just an overridable mask for native lists
+
+
+*/
+
+
 #define WeightAmp 2.0;
 
-namespace IoType {
-  enum IoType {Intra=0, GlobalIO=1, NbrIO=2};
-}
+typedef std::vector<double> MeetingPost;
+//namespace IoType {
+//  enum IoType {Intra=0, GlobalIO=1, NbrIO=2};
+//}
 typedef std::vector<NodePtr> NodeVec;
 /* ********************************************************************** */
 class Node {
@@ -28,6 +52,7 @@ public:
   double RawFire, FireVal, PrevFire;
   double LRate;
   double MinCorr, MaxCorr;
+  MeetingPost MPost;
   /* ********************************************************************** */
   Node() {
     Init();
@@ -156,6 +181,20 @@ public:
     */
   }
 //};
+};
+
+namespace IoType {
+  enum IoType {UStream=0, DStream=1, Link=2};
+}
+/* ********************************************************************** */
+class Node_Micro : public Node {
+public:
+  IoType::IoType My_Type;
+  void Mutate_Me(){
+  }
+};
+/* ********************************************************************** */
+class Node_Mega : public Node {
 };
 
 #endif // NODE_H_INCLUDED

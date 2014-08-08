@@ -6,14 +6,37 @@
 #include "FunSurf.h"
 #include "OrgProto.h"
 
+/*
+Every org cluster can connect to
+1 my link weight and fire
+2 my link's upstream meeting post,
+3 my link's downstream meeting post.
+
+does anyone need to know if I am upstream or downstream?
+if all connections are 2 way (2 links), then there are 2 orgs connecting to same post for every node nbr
+
+original idea was more vague.  2 links per, but each one's org meets the other in the middle. each org has a 2-org listening post
+so you have 2 orgs leaping between 2 links to talk to each other. how do the matching ones find each other?
+simpler for each org to just talk to 2 nodes directly.
+different posts for instars and outstars?
+doesn't matter. every org's upstream and downstream plugs will be different standards, and can occupy different regions of a single post if need be.
+
+but, an org must specify if its IO plug is going to ustream or dstream.
+
+one flag for each org's node:
+talk to ustream
+talk to dstream
+talk to link itself
+
+
+*/
+
 /* ********************************************************************** */
 class Org;
 typedef Org *OrgPtr;
 typedef std::vector<OrgPtr> OrgVec;
-//class Org : public FunSurfGrid{
 class Org : public Cluster, public OrgProto {
 public:
-  //LinkProtoPtr My_Link;
   LinkPtr My_Link;
   const static int NumScores = 2;
   double Score[NumScores];
@@ -24,7 +47,6 @@ public:
   Org() {
   }
   /* ********************************************************************** */
-  //Org(uint32_t NumDims0, uint32_t Rez0) : FunSurfGrid(NumDims0, Rez0) {
   Org(uint32_t NumDims0, uint32_t Rez0) : Cluster() {
     for (int cnt=0; cnt<NumScores; cnt++) {
       this->Score[cnt] = 0.0;

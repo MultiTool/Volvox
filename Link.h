@@ -12,6 +12,7 @@
 
 #define WeightAmp 2.0;
 
+class Org;
 class Node;
 typedef Node *NodePtr;
 /* ********************************************************************** */
@@ -46,6 +47,9 @@ public:
   void Attach_FunSurf(OrgProtoPtr Org0) {
     this->My_Org = Org0;
     Org0->Attach_Link(this);
+  }
+  /* ********************************************************************** */
+  void Attach_FunSurf2(Org *Org0) {
   }
   /* ********************************************************************** */
   void Print_Me() {
