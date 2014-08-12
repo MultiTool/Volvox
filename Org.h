@@ -133,7 +133,7 @@ public:
   void Run_Cycle() override {
     double Fire = My_Link->FireVal;// I can read this
     double Weight = My_Link->Weight;// but only write to this
-    NodePtr USNode, DSNode;
+    NodeKit<>::NodePtr USNode, DSNode;
     USNode = My_Link->USNode;
     DSNode = My_Link->DSNode;
   }

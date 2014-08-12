@@ -13,12 +13,33 @@
 #define popmax 100
 //#define popmax 10
 
+class first {
+public:
+  int numfirst;
+
+  template <class T>
+  int compute_length(T *value)
+  {
+    return value->size();
+  }
+
+// We can call this method on a pointer to any type which declares the length() method to return an int. Thusly:
+
+  std::string s = "test";
+  std::vector<int> vec;
+  int i = 0;
+
+  void snorm(){
+    compute_length(&s);
+    compute_length(&vec);
+  }
+};
 /* ********************************************************************** */
 class Comper;
 typedef Comper *ComperPtr;
 class Comper {
 public:
-  NodePtr teacher, student;
+  NodeKit<>::NodePtr teacher, student;
   double CompareAnalog() { // or score
     return teacher->FireVal * student->FireVal;
   }
@@ -98,7 +119,7 @@ public:
     size_t cnt;
     size_t start = 0, finish = 0;
     Clear_Compers();
-    NodePtr NodeUs, NodeDs;
+    NodeKit<>::NodePtr NodeUs, NodeDs;
     for (cnt=start; cnt<finish; cnt++) {
       NodeUs = Entorno->NodeList.at(cnt);
       NodeDs = ClayNet->NodeList.at(cnt);

@@ -1,6 +1,6 @@
 #pragma once
-#ifndef NODE_H_INCLUDED
-#define NODE_H_INCLUDED
+#ifndef NODETEMP_H_INCLUDED
+#define NODETEMP_H_INCLUDED
 
 /* ********************************************************************** */
 /*  THIS IS BACKPROP NODE */
@@ -14,6 +14,16 @@
 #include "FunSurf.h"
 #include "Link.h"
 #include "OrgProto.h"
+
+//template <class T>
+//class mypair {
+//    T values [2];
+//  public:
+//    mypair (T first, T second)
+//    {
+//      values[0]=first; values[1]=second;
+//    }
+//};
 
 /*
 need to define 3 node classes:
@@ -44,27 +54,30 @@ typedef std::vector<double> MeetingPost;
 //namespace IoType {
 //  enum IoType {Intra=0, GlobalIO=1, NbrIO=2};
 //}
-//typedef std::vector<NodePtr> NodeVec;
+
+template<typename Type, typename IDType=typename Type::IDType>
+class Mappings;
+
+template <class GottaBeALink>
+class NodeTemp;
+typedef NodeTemp<int> *NodeTempPtr;
+typedef std::vector<NodeTempPtr> NodeTempVec;
 /* ********************************************************************** */
-template <typename GottaBeALink>
-class Node {
+template <class GottaBeALink>
+class NodeTemp {
 public:
   LinkVec Working_Ins, Working_Outs;
   double RawFire, FireVal, PrevFire;
   double LRate;
   double MinCorr, MaxCorr;
   MeetingPost MPost;
-  //Registry<Employee>::Type employeeRoster;
-  typename NodeKit<GottaBeALink>::NodePtr other2;
-  //typedef Node<GottaBeALink> *NodePtr;
-  //typedef std::vector<NodeKit<>::NodePtr> NodeVec;
   /* ********************************************************************** */
-  Node() {
+  NodeTemp() {
     Init();
     this->LRate = 0.0;
   }
   /* ********************************************************************** */
-  ~Node() {
+  ~NodeTemp() {
     int cnt;
     for (cnt=0; cnt<this->Working_Ins.size(); cnt++) {
       delete this->Working_Ins.at(cnt);
@@ -119,18 +132,7 @@ public:
     }
   }
   /* ********************************************************************** */
-  void Print_Me() {
-    printf(" Node FireVal:%lf, MinCorr:%lf, MaxCorr:%lf, LRate:%lf, this:%p, ", this->FireVal, MinCorr, MaxCorr, LRate, this);
-    size_t siz = this->Working_Ins.size();
-    printf(" numlinks:%li\n", siz);
-    return;// snox
-    for (int cnt=0; cnt<siz; cnt++) {
-      LinkPtr lnk = this->Working_Ins.at(cnt);
-      lnk->Print_Me();
-    }
-  }
-  /* ********************************************************************** */
-  void ConnectIn(typename NodeKit<GottaBeALink>::NodePtr other) {// attach upstream node to me
+  void ConnectIn(NodeTempPtr other) {// attach upstream node to me
     LinkPtr ln = new Link();
     ConnectIn(other, ln);
   }
@@ -155,10 +157,10 @@ public:
     }
   }
   /* ********************************************************************** */
-  void ConnectIn(typename NodeKit<GottaBeALink>::NodePtr other, LinkPtr ln) {// attach upstream node to me
+  void ConnectIn(NodeTempPtr other, LinkPtr ln) {// attach upstream node to me
     this->Working_Ins.push_back(ln);// this approach uses less memory, fewer allocations/frees and is probably faster.
     other->Working_Outs.push_back(ln);
-    ln->USNode = other; ln->DSNode = this;
+    //ln->USNode = other; ln->DSNode = this;
   }
 //class Sigmoid {   public:
   /* *************************************************************************************************** */
@@ -188,20 +190,6 @@ public:
 //};
 };
 
-namespace IoType {
-  enum IoType {UStream=0, DStream=1, Link=2};
-}
-/* ********************************************************************** */
-class Node_Micro : public Node<> {
-public:
-  IoType::IoType My_Type;
-  void Mutate_Me(){
-  }
-};
-/* ********************************************************************** */
-class Node_Mega : public Node<> {
-};
-
-#endif // NODE_H_INCLUDED
+#endif // NODETEMP_H_INCLUDED
 
 

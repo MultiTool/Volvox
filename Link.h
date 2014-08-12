@@ -6,23 +6,19 @@
 #include <map>
 #include <list>
 #include "Base.h"
+#include "Forwards.h"
 #include "FunSurf.h"
 #include "Node.h"
 #include "OrgProto.h"
 
 #define WeightAmp 2.0;
 
-class Org;
-class Node;
-typedef Node *NodePtr;
 /* ********************************************************************** */
-class Link;
-typedef Link *LinkPtr;
-class Link {//} : public LinkProto {;
+class Link {
 public:
   typedef double WeightType;
   WeightType Weight; double FireVal;
-  NodePtr USNode,DSNode;
+  NodeKit<Link>::NodePtr USNode,DSNode;
   OrgProtoPtr My_Org;
   /* ********************************************************************** */
   Link() {

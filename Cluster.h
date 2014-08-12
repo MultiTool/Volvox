@@ -21,11 +21,7 @@ TrainingSets.h
 #define CLUSTER_H_INCLUDED
 
 #include "Node.h"
-//#include "Org.h"
-/*
-class Org;
-typedef Org *OrgPtr;
-*/
+
 /* ********************************************************************** */
 //class NodeVec;
 //class OrgPtr;
@@ -34,8 +30,12 @@ typedef Cluster *ClusterPtr;
 typedef std::vector<ClusterPtr> ClusterVec;
 class Cluster {
 public:
-  NodeVec *NodeListPtr;
-  NodeVec NodeList;
+  NodeKit<>::NodeVec *NodeListPtr;
+  NodeKit<>::NodeVec NodeList;
+  derived<int> deriv;
+
+//  Node<int>::NodeVec *NodeListPtr;
+//  Node<int>::NodeVec NodeList;
   /*
 Need a way to connect some nodes to mirror cluster.
 Not just normal connections, but for comparison and scoring.
@@ -71,7 +71,7 @@ an IO node sums its own input, then exchanges its fire with the fire of another.
   }
   /* ********************************************************************** */
   ~Cluster() {
-    NodePtr ndp;
+    NodeKit<>::NodePtr ndp;
     for (int ncnt=0; ncnt<this->NodeList.size(); ncnt++) {
       ndp = this->NodeList.at(ncnt);
       delete ndp;
@@ -79,11 +79,11 @@ an IO node sums its own input, then exchanges its fire with the fire of another.
   }
   /* ********************************************************************** */
   void Fill_With_Nodes(int Num_Nodes) {
-    NodePtr ndp;
+    NodeKit<>::NodePtr ndp;
     int cnt;
     this->NodeList.resize(Num_Nodes);
     for (cnt=0; cnt<Num_Nodes; cnt++) {
-      ndp = new Node();
+      ndp = new Node<>();
       this->NodeList.at(cnt) = ndp;
     }
   }
@@ -96,7 +96,7 @@ an IO node sums its own input, then exchanges its fire with the fire of another.
     // Connect upstream cluster all-to-all to this one's inputs
     size_t siz0 = this->NodeList.size();
     size_t siz1 = upstreamer->NodeList.size();
-    NodePtr dsn, usn;
+    NodeKit<>::NodePtr dsn, usn;
     int cnt0, cnt1;
     for (cnt0=0; cnt0<siz0; cnt0++) {
       dsn = this->NodeList.at(cnt0);
@@ -110,7 +110,7 @@ an IO node sums its own input, then exchanges its fire with the fire of another.
   void Print_Specs(){}
   /* ********************************************************************** */
   void Set_Learning_Rate(double LRate) {
-    NodePtr ndp;
+    NodeKit<>::NodePtr ndp;
     for (int ncnt=0; ncnt<this->NodeList.size(); ncnt++) {
       ndp = this->NodeList.at(ncnt);
       ndp->LRate = LRate;
@@ -118,7 +118,7 @@ an IO node sums its own input, then exchanges its fire with the fire of another.
   }
   /* ********************************************************************** */
   void Attach_FunSurf(OrgProtoPtr fsurf0) {
-    NodePtr ndp;
+    NodeKit<>::NodePtr ndp;
     for (int ncnt=0; ncnt<this->NodeList.size(); ncnt++) {
       ndp = this->NodeList.at(ncnt);
       ndp->Attach_FunSurf(fsurf0);
@@ -126,7 +126,7 @@ an IO node sums its own input, then exchanges its fire with the fire of another.
   }
   /* ********************************************************************** */
   void Push_Fire() {
-    NodePtr ndp;
+    NodeKit<>::NodePtr ndp;
     int cnt;
     size_t siz = this->NodeList.size();
     for (cnt=0; cnt<siz; cnt++) {
@@ -137,7 +137,7 @@ an IO node sums its own input, then exchanges its fire with the fire of another.
   }
   /* ********************************************************************** */
   void Collect_And_Fire() {
-    NodePtr ndp;
+    NodeKit<>::NodePtr ndp;
     int cnt;
     // right here the fire vals reside in the links
     size_t siz = this->NodeList.size();
@@ -154,7 +154,7 @@ an IO node sums its own input, then exchanges its fire with the fire of another.
   }
   /* ********************************************************************** */
   void Randomize_Weights() {
-    NodePtr ndp;
+    NodeKit<>::NodePtr ndp;
     size_t cnt;
     size_t siz = this->NodeList.size();
     for (cnt=0; cnt<siz; cnt++) {
@@ -164,7 +164,7 @@ an IO node sums its own input, then exchanges its fire with the fire of another.
   }
   /* ********************************************************************** */
   void Adapt_Weights() {
-    NodePtr ndp;
+    NodeKit<>::NodePtr ndp;
     size_t cnt;
     size_t siz = this->NodeList.size();
     for (cnt=0; cnt<siz; cnt++) {
@@ -175,7 +175,7 @@ an IO node sums its own input, then exchanges its fire with the fire of another.
   /* ********************************************************************** */
   void Print_Me(int ClusterNum) {
     size_t cnt;
-    NodePtr ndp;
+    NodeKit<>::NodePtr ndp;
     printf(" --------------------------------\n");
     printf(" Cluster ClusterNum:%li, this:%p, ", ClusterNum, this);
     size_t siz = this->NodeList.size();

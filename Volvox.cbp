@@ -36,6 +36,7 @@
 		</Compiler>
 		<Unit filename="Base.h" />
 		<Unit filename="Cluster.h" />
+		<Unit filename="Forwards.h" />
 		<Unit filename="FunSurf.h" />
 		<Unit filename="Link.h" />
 		<Unit filename="Lugar.h" />
