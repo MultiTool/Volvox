@@ -4,6 +4,7 @@
 class Org;
 
 /* ********************************************************************** */
+//template <typename GottaBeANode>
 class Link;
 typedef Link *LinkPtr;
 template <typename GottaBeANode>

@@ -35,6 +35,20 @@ MicroLink: does not own an org
 problem with 2 types of links, node base class can't have its own lists of links, UNLESS the base lists are just an overridable mask for native lists
 
 
+ok, starting with 1 type of node and 1 type of link
+both have an 'activate me' set of recursives, and an 'activate org below' set of recursives.
+
+mega nodes and links would have 'activate org below' while micros would not.
+
+orga do have mutation, and their micros would too.  megas would not.
+
+easiest just to give everyone mutation.
+
+
+also, there would be 2 types of clusters (mega or org), 2 types of nodes, and 2 types of links.
+
+meta-calls from the top would not be a problem if the top is all meta types
+
 */
 
 
@@ -116,6 +130,16 @@ public:
     for (int cnt=0; cnt<siz; cnt++) {
       downs = this->Working_Outs.at(cnt);
       downs->FireVal = MyFire;
+    }
+  }
+  /* ********************************************************************** */
+  void Fetch_Links(LinkVec *lvec) {
+    LinkPtr ups;
+    double MyFire=this->FireVal;
+    size_t siz = this->Working_Outs.size();
+    for (int cnt=0; cnt<siz; cnt++) {
+      ups = this->Working_Ins.at(cnt);
+      lvec->push_back(ups);
     }
   }
   /* ********************************************************************** */

@@ -136,6 +136,26 @@ an IO node sums its own input, then exchanges its fire with the fire of another.
     // right here the fire vals reside in the links
   }
   /* ********************************************************************** */
+  void Fetch_Nodes(NodeKit<>::NodeVec *nvec) {
+    NodeKit<>::NodePtr ndp;
+    int cnt;
+    size_t siz = this->NodeList.size();
+    for (cnt=0; cnt<siz; cnt++) {
+      ndp = this->NodeList.at(cnt);
+      nvec->push_back(ndp);
+    }
+  }
+  /* ********************************************************************** */
+  void Fetch_Links(LinkVec *lvec) {
+    NodeKit<>::NodePtr ndp;
+    int cnt;
+    size_t siz = this->NodeList.size();
+    for (cnt=0; cnt<siz; cnt++) {
+      ndp = this->NodeList.at(cnt);
+      ndp->Fetch_Links(lvec);
+    }
+  }
+  /* ********************************************************************** */
   void Collect_And_Fire() {
     NodeKit<>::NodePtr ndp;
     int cnt;
