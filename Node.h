@@ -54,7 +54,6 @@ meta-calls from the top would not be a problem if the top is all meta types
 
 #define WeightAmp 2.0;
 
-typedef std::vector<double> MeetingPost;
 //namespace IoType {
 //  enum IoType {Intra=0, GlobalIO=1, NbrIO=2};
 //}
@@ -65,9 +64,6 @@ class Node {
 public:
   LinkVec Working_Ins, Working_Outs;
   double RawFire, FireVal, PrevFire;
-  double LRate;
-  double MinCorr, MaxCorr;
-  MeetingPost MPost;
   //Registry<Employee>::Type employeeRoster;
   typename NodeKit<GottaBeALink>::NodePtr other2;
   //typedef Node<GottaBeALink> *NodePtr;
@@ -92,16 +88,6 @@ public:
     this->PrevFire = ((frand()*2.0)-1.0)*0.001;
     MinCorr = INT32_MAX;
     MaxCorr = INT32_MIN;
-  }
-  /* ********************************************************************** */
-  void Attach_FunSurf(OrgProtoPtr fsurf0) {
-    LinkPtr lnk;
-    int cnt;
-    for (cnt=0; cnt<this->Working_Ins.size(); cnt++) {
-      lnk = this->Working_Ins.at(cnt);
-      lnk->Attach_FunSurf(fsurf0);
-      fsurf0->Attach_Link(lnk);
-    }
   }
   /* ********************************************************************** */
   void Collect_And_Fire() {
@@ -169,16 +155,6 @@ public:
     }
   }
   /* ********************************************************************** */
-  void Adapt_Weights() {
-    LinkPtr ups;
-    Init();// clear metrics, etc.
-    size_t siz = this->Working_Ins.size();
-    for (int cnt=0; cnt<siz; cnt++) {
-      ups = this->Working_Ins.at(cnt);
-      ups->Adapt_Weight();
-    }
-  }
-  /* ********************************************************************** */
   void ConnectIn(typename NodeKit<GottaBeALink>::NodePtr other, LinkPtr ln) {// attach upstream node to me
     this->Working_Ins.push_back(ln);// this approach uses less memory, fewer allocations/frees and is probably faster.
     other->Working_Outs.push_back(ln);
@@ -210,6 +186,54 @@ public:
     */
   }
 //};
+
+  /* ******************************************************************************************************************************************** */
+  /* ******************************************************************************************************************************************** */
+  #if 1 // Mega stuff
+  /* ********************************************************************** */
+  typedef std::vector<double> MeetingPost;
+  MeetingPost MPost;
+  double LRate;
+  double MinCorr, MaxCorr;
+  /* ********************************************************************** */
+  void Attach_FunSurf(OrgProtoPtr fsurf0) {
+    LinkPtr lnk;
+    int cnt;
+    for (cnt=0; cnt<this->Working_Ins.size(); cnt++) {
+      lnk = this->Working_Ins.at(cnt);
+      lnk->Attach_FunSurf(fsurf0);
+      fsurf0->Attach_Link(lnk);
+    }
+  }
+  /* ********************************************************************** */
+  void Adapt_Weights() {
+    LinkPtr ups;
+    Init();// clear metrics, etc.
+    size_t siz = this->Working_Ins.size();
+    for (int cnt=0; cnt<siz; cnt++) {
+      ups = this->Working_Ins.at(cnt);
+      ups->Adapt_Weight();
+    }
+  }
+  /* ********************************************************************** */
+  void Fetch_SubNodes(NodeKit<>::NodeVec *nvec) {
+    LinkPtr ups;
+    size_t siz = this->Working_Ins.size();
+    for (int cnt=0; cnt<siz; cnt++) {
+      ups = this->Working_Ins.at(cnt);
+      ups->Fetch_SubNodes(nvec);
+    }
+  }
+  /* ********************************************************************** */
+  void Fetch_SubLinks(LinkVec *lvec) {
+    LinkPtr ups;
+    size_t siz = this->Working_Ins.size();
+    for (int cnt=0; cnt<siz; cnt++) {
+      ups = this->Working_Ins.at(cnt);
+      ups->Fetch_SubLinks(lvec);
+    }
+  }
+  #endif
 };
 
 namespace IoType {

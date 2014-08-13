@@ -137,6 +137,14 @@ public:
     USNode = My_Link->USNode;
     DSNode = My_Link->DSNode;
   }
+  /* ********************************************************************** */
+  void OrgProto_Fetch_SubNodes(NodeKit<>::NodeVec *nvec) override {
+    this->Fetch_Nodes(nvec);
+  }
+  /* ********************************************************************** */
+  void OrgProto_Fetch_SubLinks(LinkVec *lvec) override {
+    this->Fetch_Links(lvec);
+  }
 };
 
 #endif // ORG_H_INCLUDED

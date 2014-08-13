@@ -12,6 +12,8 @@ struct LinkKit{ //http://www.gotw.ca/gotw/079.htm
 //  typedef Link<GottaBeANode>* LinkPtr;
 //  typedef std::vector<LinkKit<GottaBeANode>::LinkPtr> LinkVec;
 };
+typedef std::vector<LinkPtr> LinkVec;
+
 /* ********************************************************************** */
 template <typename GottaBeALink=Link>
 class Node;

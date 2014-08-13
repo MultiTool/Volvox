@@ -20,7 +20,6 @@ public:
   typedef double WeightType;
   WeightType Weight; double FireVal;
   NodeKit<Link>::NodePtr USNode,DSNode;
-  OrgProtoPtr My_Org;
   /* ********************************************************************** */
   Link() {
     this->FireVal=0.0;
@@ -37,6 +36,18 @@ public:
     this->Weight = (frand()-0.5) * WeightAmp;// to do: do this with a distribution change
   }
   /* ********************************************************************** */
+  void Print_Me() {
+    printf("  Link ");
+    printf("USNode:%p, DSNode:%p ", this->USNode, this->DSNode);
+    printf("Weight:%lf \n", this->Weight);
+  }
+
+  /* ******************************************************************************************************************************************** */
+  /* ******************************************************************************************************************************************** */
+  #if 1 // Mega stuff
+  /* ********************************************************************** */
+  OrgProtoPtr My_Org;
+  /* ********************************************************************** */
   void Adapt_Weight() {
     My_Org->Run_Cycle();
   }
@@ -49,14 +60,15 @@ public:
   void Attach_FunSurf2(Org *Org0) {
   }
   /* ********************************************************************** */
-  void Print_Me() {
-    printf("  Link ");
-    printf("USNode:%p, DSNode:%p ", this->USNode, this->DSNode);
-    printf("Weight:%lf \n", this->Weight);
+  void Fetch_SubNodes(NodeKit<>::NodeVec *nvec) {
+    this->My_Org->OrgProto_Fetch_SubNodes(nvec);
   }
+  /* ********************************************************************** */
+  void Fetch_SubLinks(LinkVec *lvec) {
+    this->My_Org->OrgProto_Fetch_SubLinks(lvec);
+  }
+  #endif
 };
-typedef std::vector<LinkPtr> LinkVec;
-
 
 /* ********************************************************************** */
 class Link_Micro : public Link {

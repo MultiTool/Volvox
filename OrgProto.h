@@ -30,6 +30,10 @@ public:
   virtual void Attach_Link(LinkPtr lnk) { }
   /* ********************************************************************** */
   virtual void Run_Cycle() { }
+  /* ********************************************************************** */
+  virtual void OrgProto_Fetch_SubNodes(NodeKit<>::NodeVec *nvec) {}// = 0;
+  /* ********************************************************************** */
+  virtual void OrgProto_Fetch_SubLinks(LinkVec *lvec) {}// = 0;
 };
 
 #endif // ORGPROTO_H_INCLUDED
