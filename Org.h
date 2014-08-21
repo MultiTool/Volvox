@@ -37,7 +37,7 @@ typedef Org *OrgPtr;
 typedef std::vector<OrgPtr> OrgVec;
 class Org : public Cluster, public OrgProto {
 public:
-  LinkPtr My_Link;
+  LinkPtr My_Over_Link;
   const static int NumScores = 2;
   double Score[NumScores];
   uint32_t FinalFail;
@@ -82,6 +82,14 @@ public:
   OrgPtr Spawn() {
     OrgPtr child;
     child = new Org();
+    size_t siz = this->NodeList.size();
+    NodeKit<>::NodePtr ndp;
+    child->NodeList.resize(siz);
+    for (int cnt=0; cnt<siz; cnt++) {
+      ndp = this->NodeList.at(cnt);
+      ndp = ndp->Spawn();
+      child->NodeList.at(cnt) = ndp;
+    }
     return child;
   }
   /* ********************************************************************** */
@@ -127,15 +135,15 @@ public:
   }
   /* ********************************************************************** */
   void Attach_Link(LinkPtr lnk) override {
-    My_Link = lnk;
+    My_Over_Link = lnk;
   }
   /* ********************************************************************** */
   void Run_Cycle() override {
-    double Fire = My_Link->FireVal;// I can read this
-    double Weight = My_Link->Weight;// but only write to this
+    double Fire = My_Over_Link->FireVal;// I can read this
+    double Weight = My_Over_Link->Weight;// but only write to this
     NodeKit<>::NodePtr USNode, DSNode;
-    USNode = My_Link->USNode;
-    DSNode = My_Link->DSNode;
+    USNode = My_Over_Link->USNode;
+    DSNode = My_Over_Link->DSNode;
   }
   /* ********************************************************************** */
   void OrgProto_Fetch_SubNodes(NodeKit<>::NodeVec *nvec) override {
