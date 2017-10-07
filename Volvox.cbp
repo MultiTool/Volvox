@@ -21,9 +21,7 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
-					<Add option="-O3" />
 					<Add option="-O2" />
-					<Add option="-O1" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -32,33 +30,32 @@
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
+			<Add option="-std=c++0x" />
 			<Add option="-fexceptions" />
 		</Compiler>
-		<Unit filename="Base.h" />
-		<Unit filename="Cluster.h" />
-		<Unit filename="Forwards.h" />
-		<Unit filename="FunSurf.h" />
-		<Unit filename="Link.h" />
-		<Unit filename="Lugar.h" />
-		<Unit filename="Node.h" />
-		<Unit filename="Org.h" />
-		<Unit filename="OrgProto.h" />
-		<Unit filename="Pop.h" />
+		<Unit filename="Base.hpp" />
+		<Unit filename="Cluster.hpp" />
+		<Unit filename="Link.hpp" />
+		<Unit filename="Matrix.hpp">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="Node.hpp">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="Org.hpp">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="Pop.hpp" />
+		<Unit filename="Tester.hpp">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="TrainingSets.hpp" />
 		<Unit filename="main.cpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />
 			<debugger />
 			<lib_finder disable_auto="1" />
-			<DoxyBlocks>
-				<comment_style block="0" line="0" />
-				<doxyfile_project />
-				<doxyfile_build />
-				<doxyfile_warnings />
-				<doxyfile_output />
-				<doxyfile_dot />
-				<general />
-			</DoxyBlocks>
 		</Extensions>
 	</Project>
 </CodeBlocks_project_file>

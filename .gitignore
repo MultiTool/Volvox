@@ -1,20 +1,36 @@
+# Prerequisites
+*.d
+
 # Compiled Object files
 *.slo
 *.lo
 *.o
+*.obj
 obj/
+
+# Precompiled Headers
+*.gch
+*.pch
 
 # Compiled Dynamic libraries
 *.so
 *.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
 
 # Compiled Static libraries
 *.lai
 *.la
 *.a
+*.lib
 
-# Executable
+# Executables
 *.exe
+*.out
+*.app
 bin/
 
 # Code Blocks junk
@@ -22,4 +38,4 @@ bin/
 *.cbTemp
 
 # Core dumps
-*.out 
+*.out

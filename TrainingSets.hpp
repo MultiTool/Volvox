@@ -1,18 +1,19 @@
-#ifndef TRAININGSETS_H_INCLUDED
-#define TRAININGSETS_H_INCLUDED
+#ifndef TRAININGSETS_HPP_INCLUDED
+#define TRAININGSETS_HPP_INCLUDED
 
 /* ********************************************************************** */
 class IOPair;
 typedef IOPair *IOPairPtr;
 typedef std::vector<IOPairPtr> IOPairVec;
-class IOPair {
+class IOPair {// one input-output pair
 public:
   std::vector<double> invec, goalvec;
 };
-class TrainSet;
+/* ********************************************************************** */
+class TrainSet; // forward
 typedef TrainSet *TrainSetPtr;
 //typedef std::vector<TrainSetPtr> TrainingSetList;
-class TrainSet : public IOPairVec {
+class TrainSet : public IOPairVec {// one truth table
 public:
   char Name[300];
   ~TrainSet() {
@@ -20,7 +21,7 @@ public:
   };
   void Clear() {
     // IOPairPtr pptr;
-    for (int cnt=0; cnt<this->size(); cnt++) {
+    for (size_t cnt=0; cnt<this->size(); cnt++) {
       delete this->at(cnt);
     }
     this->clear();
@@ -49,6 +50,8 @@ public:
   }
 };
 /* ********************************************************************** */
+class TrainingSetList; // forward
+typedef TrainingSetList *TrainingSetListPtr;
 class TrainingSetList : public std::vector<TrainSetPtr> {
 public:
   ~TrainingSetList() {
@@ -56,7 +59,7 @@ public:
   };
   void Clear() {
     size_t siz = this->size();
-    for (int pcnt=0; pcnt<siz; pcnt++) {
+    for (size_t pcnt=0; pcnt<siz; pcnt++) {
       delete this->at(pcnt);
     }
     this->clear();
@@ -107,4 +110,4 @@ public:
   }
 };
 
-#endif // TRAININGSETS_H_INCLUDED
+#endif // TRAININGSETS_HPP_INCLUDED
