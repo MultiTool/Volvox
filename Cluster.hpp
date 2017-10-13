@@ -42,8 +42,7 @@ public:
     //IONodes.push_back()
   }
   /* ********************************************************************** */
-  void Connect_Other_Cluster(ClusterPtr upstreamer) {
-    // Connect upstream cluster all-to-all to this one's inputs
+  void Connect_Other_Cluster(ClusterPtr upstreamer) {// Connect upstream cluster all-to-all to this one's inputs
     size_t siz0 = this->NodeList.size();
     size_t siz1 = upstreamer->NodeList.size();
     NodePtr dsn, usn;
@@ -89,6 +88,9 @@ public:
     Push_Fire();
     // right here the fire vals reside in the links
     Collect_And_Fire();
+    double fred=12;
+    //this->Aaagh<double>(fred);
+    //this->Aaagh<void>(void);
   }
   /* ********************************************************************** */
   template <class AaaghType> void Aaagh(AaaghType fred) {
@@ -122,10 +124,40 @@ public:
     printf("\n");
   }
   /* ********************************************************************** */
+  void Load_Inputs(VectPtr invec) {
+    std::vector<double> *ray = &(invec->ray);
+    size_t siz = std::min(ray->size(), this->NodeList.size());//IONodes
+    for (size_t cnt=0; cnt<siz; cnt++) {
+      this->NodeList.at(cnt)->Load_Input(ray->at(cnt));
+    }
+  }
+  /* ********************************************************************** */
   void Load_Inputs(std::vector<double> *invec) {
     size_t siz = std::min(invec->size(), this->NodeList.size());//IONodes
     for (size_t cnt=0; cnt<siz; cnt++) {
       this->NodeList.at(cnt)->Load_Input(invec->at(cnt));
+    }
+  }
+  /* ********************************************************************** */
+  void Load_Inputs(double *invec, size_t siz) {
+    siz = std::min(siz, this->NodeList.size());//IONodes
+    for (size_t cnt=0; cnt<siz; cnt++) {
+      this->NodeList.at(cnt)->Load_Input(invec[cnt]);
+    }
+  }
+  /* ********************************************************************** */
+  void Get_Outputs(VectPtr outvec) {
+    std::vector<double> *ray = &(outvec->ray);
+    size_t siz = std::min(ray->size(), this->NodeList.size());//IONodes
+    for (size_t cnt=0; cnt<siz; cnt++) {
+      ray->at(cnt) = this->NodeList.at(cnt)->Get_Output();
+    }
+  }
+  /* ********************************************************************** */
+  void Get_Outputs(std::vector<double> *outvec) {
+    size_t siz = std::min(outvec->size(), this->NodeList.size());//IONodes
+    for (size_t cnt=0; cnt<siz; cnt++) {
+      outvec->at(cnt) = this->NodeList.at(cnt)->Get_Output();
     }
   }
 };

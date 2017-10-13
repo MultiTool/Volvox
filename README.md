@@ -1,4 +1,3 @@
-Volvox 
-=======
+# Slingshot
+A less ambitious version of Volvox.
 
-A slightly different take on BackpropLab

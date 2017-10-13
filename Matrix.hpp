@@ -14,28 +14,29 @@ typedef Vect *VectPtr;
 class Vect {
 public:
   int len;
-  double* ray;
+  //double* ray;// to do: change array to std vector
+  std::vector<double> ray;
+  //std::array<int, 3> a1{ {1, 2, 3} }; // double-braces required in C++11 (not in C++14)
   /* ********************************************************************** */
   Vect(int wdt0) {
     this->len = wdt0;
-    this->ray = allocsafe(double, this->len);
-    for (int cnt=0; cnt<this->len; cnt++) {
-      this->ray[cnt]=0.01;
-    }
+    ray.resize(wdt0, 0.01); //ray.reserve(wdt0);
+    //double *array = &(*testvec.begin());
+
+    //for (int cnt=0; cnt<this->len; cnt++) { this->ray[cnt]=0.01; }
   }
   /* ********************************************************************** */
   ~Vect() {
-    freesafe(this->ray);
   }
   /* ********************************************************************** */
   void Copy_From(VectPtr source) {
     int ln = std::min(this->len,source->len);
-    std::memcpy(this->ray, source->ray, ln*sizeof(double));
+    std::copy_n(source->ray.begin(), ln, this->ray.begin());
   }
   /* ********************************************************************** */
   void Copy_From(VectPtr source, int Limit) {
     int ln = std::min(std::min(this->len, source->len), Limit);
-    std::memcpy(this->ray, source->ray, ln*sizeof(double));
+    std::copy_n(source->ray.begin(), ln, this->ray.begin());
   }
   /* ********************************************************************** */
   void Add_To_Me(VectPtr other, int Limit) {
@@ -59,6 +60,16 @@ public:
       sum+=this->ray[cnt]*other->ray[cnt];
     }
     return sum;
+  }
+  /* ********************************************************************** */
+  double Magnitude() {
+    int ln = this->len;
+    double val, SumSq=0.0;
+    for (int cnt=0; cnt<ln; cnt++) {
+      val = this->ray[cnt];
+      SumSq += val*val;
+    }
+    return std::sqrt(SumSq);
   }
   /* ********************************************************************** */
   double MultFire(Vect* other) {
@@ -112,6 +123,25 @@ public:
       printf("%f, ",val);
     }
     printf("\n");
+  }
+  /* ********************************************************************** */
+  double Compare(VectPtr other){// strictly for genalg scoring
+    int ln = std::min(this->len, other->len);
+    double range = 2.0;
+    double val0, val1, digival0, digival1, diff, digidiff, digiscore;
+    double singlescore, score = 1.0;
+    for (int cnt=0;cnt<ln;cnt++){
+      digival0 =  std::copysign(1.0, this->ray[cnt]);
+      digival1 =  std::copysign(1.0, other->ray[cnt]);
+      digidiff=std::fabs(digival0-digival1);
+      digiscore+=(range-digidiff)/range;
+      val0 =  this->ray[cnt];
+      val1 =  other->ray[cnt];
+      diff=std::fabs(val0-val1);
+      singlescore=(range-diff)/range;
+      score*=singlescore;
+    }
+    return score;
   }
 };
 

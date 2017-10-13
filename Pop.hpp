@@ -20,7 +20,9 @@ public:
   double avgnumwinners = 0.0;
   TesterPtr tester;// crucible
   uint32_t GenCnt;
-  const double MutRate=0.2;//0.2;//0.3;//0.8
+  const double MutRate=0.2;//0.2;//0.3;//0.8//0.6;//
+  const int MaxOrgGens = 1000;
+  const int MaxRetries = 1;//16;
   double SurvivalRate=0.2;//0.5;
   size_t NumSurvivors;
   double SumScores=0,AvgScore=0.0;
@@ -46,7 +48,7 @@ public:
       org = Org::Abiogenate();
       ScoreDexv.at(pcnt) = org;
     }
-    if (true){
+    if (false){
       tester=new TesterMx(Org::DefaultWdt, Org::DefaultHgt);
     }else{
       tester=new TesterNet();
@@ -57,11 +59,11 @@ public:
   }
   /* ********************************************************************** */
   void Evolve() {// evolve for generations
-    uintmax_t EvoStagnationLimit = 75;//50;
-    for (int RetryCnt=0;RetryCnt<16;RetryCnt++){
+    uintmax_t EvoStagnationLimit = 100;//75;//50;
+    for (int RetryCnt=0;RetryCnt<MaxRetries;RetryCnt++){
       double CurrentTopScore, TopScore = 0.0;
       int AbortCnt=0;
-      for (int gcnt=0;gcnt<1000;gcnt++){
+      for (int gcnt=0;gcnt<MaxOrgGens;gcnt++){
         this->Gen();
         CurrentTopScore=this->GetTopScore();
         if (TopScore<CurrentTopScore){
@@ -72,10 +74,12 @@ public:
         }
       }
       this->Print_Results();
-      for (int gcnt=0;gcnt<50;gcnt++){
-        this->Gen_No_Mutate();// coast, no mutations
+      if (false){
+        for (int gcnt=0;gcnt<50;gcnt++){
+          this->Gen_No_Mutate();// coast, no mutations
+        }
+        this->Print_Results();
       }
-      this->Print_Results();
       printf("RetryCnt:%i\n\n", RetryCnt);
       //std::cin.getline(name,256);
 
@@ -131,7 +135,7 @@ public:
     SumScores+=TopDigiScore;
     //AvgScore=SumScores/this->GenCnt;
     AvgScore=(AvgScore*0.9) + (TopDigiScore*0.1);
-    //printf("GenCnt:%i, TopScore:%f, AvgScore:%f, TopDigiScore::%f\n", this->GenCnt, TopScore, AvgScore, TopDigiScore);
+    printf("GenCnt:%4d, TopScore:%f, AvgScore:%f, TopDigiScore::%f\n", this->GenCnt, TopScore, AvgScore, TopDigiScore);
     this->GenCnt++;
   }
   /* ********************************************************************** */

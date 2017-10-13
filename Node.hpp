@@ -72,6 +72,14 @@ public:
     #endif // LinkOrg
   }
   /* ********************************************************************** */
+  double Get_Output() {
+    double OutVal=0;
+    for (int cnt=0;cnt<VecTradeSize;cnt++){
+      OutVal += this->CrossRoads->ray.at(cnt);
+    }
+    return OutVal/VecTradeSize;// average?
+  }
+  /* ********************************************************************** */
   void Collect_And_Fire() {
     LinkPtr ups;
     size_t siz;

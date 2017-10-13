@@ -3,7 +3,7 @@
 
 #include "Org.hpp"
 #include "Cluster.hpp"
-#include "TrainingSets.hpp"
+// #include "TrainingSets.hpp"
 
 /* ********************************************************************** */
 class Tester;// forward
@@ -120,23 +120,24 @@ typedef std::vector<TesterNetPtr> TesterNetVec;
 class TesterNet : public Tester {// evolve to create a backpropagation learning rule
 public:
   ClusterPtr BPNet;// crucible
-  uint32_t MaxNeuroGens = 2000;
+  const static uint32_t MaxNeuroGens = 1000;//100;//2000;
+  const static uint32_t TestRuns = 10;
   uint32_t DoneThresh = 32;//64; //32; //64;// 128;//16;
+  static const int External_Node_Number=2, Total_Node_Number=External_Node_Number+3;
   MatrixPtr model;// behavior to imitate
-  static const int ModelWdt=4, ModelHgt=4;// size of the big framework net that holds the models
+  static const int ModelWdt=Total_Node_Number, ModelHgt=Total_Node_Number;// size of the big framework net that holds the models
   int MxWdt, MxHgt;
-  VectPtr outvec0, outvec1;
-  int Iterations=3;
+  int ModelIterations=1;
   const static int Num_Invecs = 20;
-  VectPtr invec[Num_Invecs];
-  TrainingSetList TrainingSets;
   /* ********************************************************************** */
   TesterNet(){
     this->MxWdt=ModelWdt; this->MxHgt=ModelHgt;
     this->model = new Matrix(ModelWdt, ModelHgt);
     this->model->Rand_Init();// mutate 100%
-    BPNet = new Cluster();
-    TrainingSets.All_Truth(2);
+    printf("Model:\n");
+    this->model->Print_Me();
+    BPNet = new Cluster(Total_Node_Number);
+    BPNet->Connect_Other_Cluster(BPNet);
   }
   /* ********************************************************************** */
   ~TesterNet(){
@@ -145,6 +146,7 @@ public:
   }
   /* ********************************************************************** */
   void Reset_Input() override {// once per generation
+    this->model->Rand_Init();// do we want to do this?
   }
   /* ********************************************************************** */
   void Test() override {
@@ -152,14 +154,59 @@ public:
   /* ********************************************************************** */
   void Test(OrgPtr candidate) override {
     this->BPNet->Attach_Genome(candidate);
-    VectPtr iv;
-    for (int vcnt=0;vcnt<Num_Invecs;vcnt++){
-      iv = this->invec[vcnt];
-      model->Iterate(iv, Iterations, outvec0);
-      candidate->Iterate(iv, Iterations, outvec1);
+    Vect ModelState(Total_Node_Number);
+    Vect Xfer(External_Node_Number);//, outvec(External_Node_Number);
+    ModelState.Rand_Init();
+    double score;
+    // Learning loop
+    for (int vcnt=0;vcnt<MaxNeuroGens;vcnt++){
+      Xfer.Copy_From(&ModelState, External_Node_Number);// duplicate inputs so model and network have the same inputs
+      if (false){
+        printf("ModelState1:\n");
+        ModelState.Print_Me();
+      }
+      model->Iterate(&ModelState, ModelIterations, &ModelState);
+      if (false){
+        printf("ModelState2:\n");
+        ModelState.Print_Me();
+      }
+      this->BPNet->Load_Inputs(&Xfer);
+      this->BPNet->Fire_Gen();
     }
-    candidate->Score[0]=1;//dummy assignment
-    candidate->Score[1]=1;//dummy assignment
+    // Scoring loop
+    score=1.0;
+    //ModelState.Rand_Init();
+    for (int vcnt=0;vcnt<TestRuns;vcnt++){
+      Xfer.Copy_From(&ModelState, External_Node_Number);// duplicate inputs so model and network have the same inputs
+
+      model->Iterate(&ModelState, ModelIterations, &ModelState);
+      if (false){
+        printf("ModelState3:\n");
+        ModelState.Print_Me();
+      }
+      this->BPNet->Load_Inputs(&Xfer);
+      this->BPNet->Fire_Gen();
+      this->BPNet->Get_Outputs(&Xfer);
+      // here we want to compare the outputs and score the Org. compare outvec with the external parts of ModelState
+      score *= Xfer.Compare(&ModelState);
+      //printf("ModelState.Magnitude:%f, Xfer.Magnitude:%f\n", ModelState.Magnitude(), Xfer.Magnitude());
+      if (false){
+      //if (vcnt>2){
+        printf("comparison\n");
+        Xfer.Print_Me();
+        ModelState.Print_Me();
+      }
+    }
+    //printf("score:%f\n", score);
+    candidate->Score[0]=score;
+    candidate->Score[1]=0.0;//dummy assignment
+/*
+ok test is:
+model iterates once
+bpnet iterates once, in which each org iterates 3 times
+a subset of bpnet output and model output are compared
+model subset output then overwrites bpnet output, becomes input
+*/
   }
   /* ********************************************************************** */
   void Print_Me() override {
@@ -167,78 +214,10 @@ public:
   }
   /* ********************************************************************** */
   double Dry_Run_Test() {
-#if false
-    uint32_t GenCnt;
-    double goal;
-    double WinCnt;
-    IOPairPtr Pair;
-    WinCnt=0.0;
-    for (GenCnt=0; GenCnt<MaxNeuroGens; GenCnt++) {
-      Pair = TSet->at(GenCnt%TSet->size());
-      goal = Pair->goalvec.at(0);
-      // BPNet->Load_Inputs(Pair->invec.at(0), Pair->invec.at(1), 1.0);
-      BPNet->Load_Inputs(&(Pair->invec));
-      BPNet->Fire_Gen();
-      double fire = BPNet->OutLayer->NodeList.at(0)->FireVal;
-      if (goal*fire>0) {
-        WinCnt++;
-      }
-    }
-    return WinCnt/((double)MaxNeuroGens);
-#endif // false
     return 0;
   }
   /* ********************************************************************** */
   void Run_Test() {
-#if false
-    uint32_t FinalFail = 0;
-    uint32_t GenCnt;
-    double goal;
-    double ScoreBefore;
-    double WinCnt;
-    IOPairPtr Pair;
-    do {
-      BPNet->Randomize_Weights();
-      ScoreBefore = Dry_Run_Test(16, TSet);
-    } while (ScoreBefore==1.0);
-    BPNet->Attach_Genome(FSurf);
-    WinCnt=0.0;
-    //MaxNeuroGens/=TSet->size();
-    for (GenCnt=0; GenCnt<MaxNeuroGens; GenCnt++) {
-      Pair = TSet->at(GenCnt%TSet->size());
-
-      goal = Pair->goalvec.at(0);
-      BPNet->Load_Inputs(&(Pair->invec));
-      BPNet->Fire_Gen();
-      double fire = BPNet->OutLayer->NodeList.at(0)->FireVal;
-      if (goal*fire>0) {
-        WinCnt++;
-      } else {
-        FinalFail = GenCnt;
-      }
-      if ((GenCnt-FinalFail)>DoneThresh) {
-        break;
-      }
-      // BPNet->Backprop(goal);
-      BPNet->Backprop(&(Pair->goalvec));
-      //}
-    }
-    double PrimaryScore = 0;
-    if (FinalFail>=(MaxNeuroGens-DoneThresh)) {
-      PrimaryScore = 0.0;
-    } else {
-      PrimaryScore = 1.0 - ( ((double)FinalFail)/(double)(MaxNeuroGens-DoneThresh) );// oneify
-    }
-    FSurf->FinalFail = FinalFail;
-    FSurf->Score[0] *= PrimaryScore;//1.0 - ( ((double)FinalFail)/(double)MaxNeuroGens );// oneify
-    double Remainder = MaxNeuroGens-GenCnt;// if nobody won *earlier*, then score by average goodness of output
-    double temp = ( (WinCnt+Remainder)/((double)MaxNeuroGens) ) - ScoreBefore;
-    temp = (temp+1.0)/2.0;
-    if (temp<0.0) {
-      temp=0.0;
-    }
-    FSurf->Score[1] *= temp;//oneify
-#endif // false
   }
 };
 
