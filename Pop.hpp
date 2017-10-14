@@ -25,7 +25,7 @@ public:
   const int MaxRetries = 1;//16;
   double SurvivalRate=0.2;//0.5;
   size_t NumSurvivors;
-  double SumScores=0,AvgScore=0.0;
+  double SumScores=0, AvgTopScore=0.0;
   /* ********************************************************************** */
   Pop() : Pop(popmax) {
   }
@@ -100,7 +100,7 @@ public:
       org = ScoreDexv.at(pcnt);
       org->Rand_Init();
     }
-    this->GenCnt=0; SumScores=0.0; AvgScore=0.0;
+    this->GenCnt=0; SumScores=0.0; AvgTopScore=0.0;
   }
   /* ********************************************************************** */
   void Clear() {// is it really necessary to be able to clear without just deleting the population?
@@ -133,9 +133,9 @@ public:
     double TopDigiScore = TopOrg->Score[1];
     Birth_And_Death();
     SumScores+=TopDigiScore;
-    //AvgScore=SumScores/this->GenCnt;
-    AvgScore=(AvgScore*0.9) + (TopDigiScore*0.1);
-    printf("GenCnt:%4d, TopScore:%f, AvgScore:%f, TopDigiScore::%f\n", this->GenCnt, TopScore, AvgScore, TopDigiScore);
+    //AvgTopScore=SumScores/this->GenCnt;
+    AvgTopScore=(AvgTopScore*0.9) + (TopDigiScore*0.1);
+    printf("GenCnt:%4d, TopScore:%f, AvgTopScore:%f, TopDigiScore::%f\n", this->GenCnt, TopScore, AvgTopScore, TopDigiScore);
     this->GenCnt++;
   }
   /* ********************************************************************** */
@@ -152,8 +152,8 @@ public:
 
     double TopScore = TopOrg->Score[0];
     double TopDigiScore = TopOrg->Score[1];
-    AvgScore=(AvgScore*0.9) + (TopDigiScore*0.1);
-    printf("GenCnt:%i, TopScore:%f, AvgScore:%f, TopDigiScore::%f\n", this->GenCnt, TopScore, AvgScore, TopDigiScore);
+    AvgTopScore=(AvgTopScore*0.9) + (TopDigiScore*0.1);
+    printf("GenCnt:%i, TopScore:%f, AvgTopScore:%f, TopDigiScore::%f\n", this->GenCnt, TopScore, AvgTopScore, TopDigiScore);
   }
   /* ********************************************************************** */
   double AvgBeast() {

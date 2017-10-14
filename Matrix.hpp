@@ -125,11 +125,12 @@ public:
     printf("\n");
   }
   /* ********************************************************************** */
-  double Compare(VectPtr other){// strictly for genalg scoring
+  double Score_Similarity(VectPtr other, double &digiscore){// strictly for genalg scoring
     int ln = std::min(this->len, other->len);
     double range = 2.0;
-    double val0, val1, digival0, digival1, diff, digidiff, digiscore;
+    double val0, val1, digival0, digival1, diff, digidiff;
     double singlescore, score = 1.0;
+    digiscore=0.0;
     for (int cnt=0;cnt<ln;cnt++){
       digival0 =  std::copysign(1.0, this->ray[cnt]);
       digival1 =  std::copysign(1.0, other->ray[cnt]);

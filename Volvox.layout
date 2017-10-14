@@ -2,24 +2,14 @@
 <CodeBlocks_layout_file>
 	<FileVersion major="1" minor="0" />
 	<ActiveTarget name="Debug" />
-	<File name="Node.hpp" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="-3" zoom_2="0">
+	<File name="Matrix.hpp" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="-2" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="4019" topLine="83" />
+			<Cursor1 position="4348" topLine="108" />
 		</Cursor>
 	</File>
-	<File name="Link.hpp" open="1" top="0" tabpos="10" split="0" active="1" splitpos="0" zoom_1="-2" zoom_2="0">
+	<File name="Pop.hpp" open="1" top="1" tabpos="6" split="0" active="1" splitpos="0" zoom_1="-2" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="1054" topLine="16" />
-		</Cursor>
-	</File>
-	<File name="Tester.hpp" open="1" top="0" tabpos="8" split="0" active="1" splitpos="0" zoom_1="-2" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="6528" topLine="151" />
-		</Cursor>
-	</File>
-	<File name="Org.hpp" open="1" top="0" tabpos="7" split="0" active="1" splitpos="0" zoom_1="-2" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="2511" topLine="34" />
+			<Cursor1 position="5617" topLine="139" />
 		</Cursor>
 	</File>
 	<File name="TrainingSets.hpp" open="1" top="0" tabpos="9" split="0" active="1" splitpos="0" zoom_1="-2" zoom_2="0">
@@ -27,14 +17,19 @@
 			<Cursor1 position="787" topLine="6" />
 		</Cursor>
 	</File>
-	<File name="Pop.hpp" open="1" top="1" tabpos="6" split="0" active="1" splitpos="0" zoom_1="-2" zoom_2="0">
+	<File name="Cluster.hpp" open="1" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="-3" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="4115" topLine="106" />
+			<Cursor1 position="1714" topLine="24" />
 		</Cursor>
 	</File>
-	<File name="main.cpp" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="-2" zoom_2="0">
+	<File name="Tester.hpp" open="1" top="0" tabpos="8" split="0" active="1" splitpos="0" zoom_1="-2" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="280" topLine="5" />
+			<Cursor1 position="7258" topLine="165" />
+		</Cursor>
+	</File>
+	<File name="Node.hpp" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="-3" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="4019" topLine="65" />
 		</Cursor>
 	</File>
 	<File name="Base.hpp" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="-2" zoom_2="0">
@@ -42,14 +37,19 @@
 			<Cursor1 position="1471" topLine="60" />
 		</Cursor>
 	</File>
-	<File name="Cluster.hpp" open="1" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="-3" zoom_2="0">
+	<File name="Link.hpp" open="1" top="0" tabpos="10" split="0" active="1" splitpos="0" zoom_1="-2" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="1714" topLine="24" />
+			<Cursor1 position="1054" topLine="9" />
 		</Cursor>
 	</File>
-	<File name="Matrix.hpp" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="-2" zoom_2="0">
+	<File name="Org.hpp" open="1" top="0" tabpos="7" split="0" active="1" splitpos="0" zoom_1="-2" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="7712" topLine="195" />
+			<Cursor1 position="2511" topLine="31" />
+		</Cursor>
+	</File>
+	<File name="main.cpp" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="-2" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="280" topLine="2" />
 		</Cursor>
 	</File>
 </CodeBlocks_layout_file>

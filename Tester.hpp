@@ -157,7 +157,7 @@ public:
     Vect ModelState(Total_Node_Number);
     Vect Xfer(External_Node_Number);//, outvec(External_Node_Number);
     ModelState.Rand_Init();
-    double score;
+    double score, digiscore, sumdigiscore;
     // Learning loop
     for (int vcnt=0;vcnt<MaxNeuroGens;vcnt++){
       Xfer.Copy_From(&ModelState, External_Node_Number);// duplicate inputs so model and network have the same inputs
@@ -175,6 +175,7 @@ public:
     }
     // Scoring loop
     score=1.0;
+    sumdigiscore=0;
     //ModelState.Rand_Init();
     for (int vcnt=0;vcnt<TestRuns;vcnt++){
       Xfer.Copy_From(&ModelState, External_Node_Number);// duplicate inputs so model and network have the same inputs
@@ -188,7 +189,8 @@ public:
       this->BPNet->Fire_Gen();
       this->BPNet->Get_Outputs(&Xfer);
       // here we want to compare the outputs and score the Org. compare outvec with the external parts of ModelState
-      score *= Xfer.Compare(&ModelState);
+      score *= Xfer.Score_Similarity(&ModelState, digiscore);
+      sumdigiscore+=digiscore;
       //printf("ModelState.Magnitude:%f, Xfer.Magnitude:%f\n", ModelState.Magnitude(), Xfer.Magnitude());
       if (false){
       //if (vcnt>2){
@@ -199,7 +201,7 @@ public:
     }
     //printf("score:%f\n", score);
     candidate->Score[0]=score;
-    candidate->Score[1]=0.0;//dummy assignment
+    candidate->Score[1]=sumdigiscore;
 /*
 ok test is:
 model iterates once
