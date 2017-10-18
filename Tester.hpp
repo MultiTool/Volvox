@@ -129,15 +129,23 @@ public:
   int MxWdt, MxHgt;
   int ModelIterations=1;
   const static int Num_Invecs = 20;
+  VectPtr ModelStateSeed;//Total_Node_Number);
   /* ********************************************************************** */
   TesterNet(){
     this->MxWdt=ModelWdt; this->MxHgt=ModelHgt;
     this->model = new Matrix(ModelWdt, ModelHgt);
-    this->model->Rand_Init();// mutate 100%
+    double Mag=0.0;
+    do {
+      this->model->Rand_Init();// mutate 100%
+      Mag = this->model->Magnitude();
+    } while (Mag<2.0);
     printf("Model:\n");
     this->model->Print_Me();
+    printf("\n");
     BPNet = new Cluster(Total_Node_Number);
     BPNet->Connect_Other_Cluster(BPNet);
+    ModelStateSeed = new Vect(Total_Node_Number);
+    ModelStateSeed->Rand_Init();
   }
   /* ********************************************************************** */
   ~TesterNet(){
@@ -147,6 +155,7 @@ public:
   /* ********************************************************************** */
   void Reset_Input() override {// once per generation
     this->model->Rand_Init();// do we want to do this?
+    this->ModelStateSeed->Rand_Init();
   }
   /* ********************************************************************** */
   void Test() override {
@@ -156,10 +165,12 @@ public:
     this->BPNet->Attach_Genome(candidate);
     Vect ModelState(Total_Node_Number);
     Vect Xfer(External_Node_Number);//, outvec(External_Node_Number);
-    ModelState.Rand_Init();
-    double score, digiscore, sumdigiscore;
+    ModelState.Copy_From(ModelStateSeed);
+    double onescore, score, digiscore, sumdigiscore;
+    int OneBitDex = External_Node_Number-1;
     // Learning loop
     for (int vcnt=0;vcnt<MaxNeuroGens;vcnt++){
+      ModelState.ray[OneBitDex]=1.0;
       Xfer.Copy_From(&ModelState, External_Node_Number);// duplicate inputs so model and network have the same inputs
       if (false){
         printf("ModelState1:\n");
@@ -178,6 +189,7 @@ public:
     sumdigiscore=0;
     //ModelState.Rand_Init();
     for (int vcnt=0;vcnt<TestRuns;vcnt++){
+      ModelState.ray[OneBitDex]=1.0;
       Xfer.Copy_From(&ModelState, External_Node_Number);// duplicate inputs so model and network have the same inputs
 
       model->Iterate(&ModelState, ModelIterations, &ModelState);
@@ -189,7 +201,14 @@ public:
       this->BPNet->Fire_Gen();
       this->BPNet->Get_Outputs(&Xfer);
       // here we want to compare the outputs and score the Org. compare outvec with the external parts of ModelState
-      score *= Xfer.Score_Similarity(&ModelState, digiscore);
+      onescore = Xfer.Score_Similarity(&ModelState, digiscore);
+      if (onescore>1.0){
+        printf("Tester error:%f",onescore);
+      }
+      score *= onescore;
+      if (score>1.0){
+        printf("Tester error:%f",score);
+      }
       sumdigiscore+=digiscore;
       //printf("ModelState.Magnitude:%f, Xfer.Magnitude:%f\n", ModelState.Magnitude(), Xfer.Magnitude());
       if (false){

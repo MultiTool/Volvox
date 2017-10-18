@@ -1,5 +1,5 @@
-#ifndef SYNAPSE_HPP_INCLUDED
-#define SYNAPSE_HPP_INCLUDED
+#ifndef LINK_HPP_INCLUDED
+#define LINK_HPP_INCLUDED
 
 #include "Org.hpp"
 
@@ -48,4 +48,4 @@ public:
 };
 
 
-#endif // SYNAPSE_HPP_INCLUDED
+#endif // LINK_HPP_INCLUDED

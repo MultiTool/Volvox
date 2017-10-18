@@ -62,14 +62,25 @@ public:
     return sum;
   }
   /* ********************************************************************** */
-  double Magnitude() {
+  void Scale_Me(double scale) {
+    int ln = this->len;
+    for (int cnt=0; cnt<ln; cnt++) {
+      this->ray[cnt] *= scale;
+    }
+  }
+  /* ********************************************************************** */
+  double SumOfSquares() {
     int ln = this->len;
     double val, SumSq=0.0;
     for (int cnt=0; cnt<ln; cnt++) {
       val = this->ray[cnt];
       SumSq += val*val;
     }
-    return std::sqrt(SumSq);
+    return SumSq;
+  }
+  /* ********************************************************************** */
+  double Magnitude() {
+    return std::sqrt(this->SumOfSquares());
   }
   /* ********************************************************************** */
   double MultFire(Vect* other) {
@@ -131,6 +142,9 @@ public:
     double val0, val1, digival0, digival1, diff, digidiff;
     double singlescore, score = 1.0;
     digiscore=0.0;
+    if (ln<=0){
+      printf("ln error:%d",ln);
+    }
     for (int cnt=0;cnt<ln;cnt++){
       digival0 =  std::copysign(1.0, this->ray[cnt]);
       digival1 =  std::copysign(1.0, other->ray[cnt]);
@@ -140,6 +154,9 @@ public:
       val1 =  other->ray[cnt];
       diff=std::fabs(val0-val1);
       singlescore=(range-diff)/range;
+      if (singlescore>1.0){
+        printf("Matrix error:%f",singlescore);
+      }
       score*=singlescore;
     }
     return score;
@@ -170,6 +187,20 @@ public:
     }
     freesafe(this->ray);
     delete this->midvec;
+  }
+  /* ********************************************************************** */
+  double Magnitude() {
+    double SumSq = 0.0;
+    for (int cnt=0; cnt<this->hgt; cnt++) {
+      SumSq += this->ray[cnt]->SumOfSquares();
+    }
+    return std::sqrt(SumSq);
+  }
+  /* ********************************************************************** */
+  void Scale_Me(double scale) {
+    for (int cnt=0; cnt<this->hgt; cnt++) {
+      this->ray[cnt]->Scale_Me(scale);
+    }
   }
   /* ********************************************************************** */
   MatrixPtr Clone_Me() {

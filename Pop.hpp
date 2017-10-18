@@ -90,6 +90,9 @@ public:
   double GetTopScore() {// not working yet
     OrgPtr TopOrg = ScoreDexv[0];
     double TopScore = TopOrg->Score[0];
+    if (TopScore>1.0){
+      printf("Pop error:%f", TopScore);
+    }
     return TopScore;
   }
   /* ********************************************************************** */
@@ -180,24 +183,18 @@ public:
   void Birth_And_Death() {
     size_t siz = ScoreDexv.size();
     size_t topcnt, cnt;
-    OrgPtr doomed, child;
+    OrgPtr doomed, child, survivor;
     topcnt = 0;
+    for (cnt=0; cnt<NumSurvivors; cnt++) {
+      survivor = ScoreDexv[cnt];
+      survivor->ClearScores();
+    }
     for (cnt=NumSurvivors; cnt<siz; cnt++) {
       doomed = ScoreDexv[cnt]; doomed->Doomed = true;
       delete doomed;
       child = ScoreDexv[topcnt]->Spawn();// Whenever one dies, replace it with the child of another.
       ScoreDexv[cnt] = child;
       if (++topcnt>=NumSurvivors) {topcnt=0;}
-    }
-  }
-  /* ********************************************************************** */
-  void Mutate_Sorted(double Pop_MRate, double Org_MRate) {
-    size_t siz = this->ScoreDexv.size();
-    for (size_t cnt=16; cnt<siz; cnt++) {
-      if (frand()<Pop_MRate) {
-        OrgPtr org = this->ScoreDexv[cnt];
-        org->Mutate_Me(Org_MRate);
-      }
     }
   }
   /* ********************************************************************** */

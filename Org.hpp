@@ -30,6 +30,12 @@ public:
     return child;
   }
   /* ********************************************************************** */
+  void ClearScores() {
+    for (int cnt=0;cnt<NumScores;cnt++){
+      this->Score[NumScores] = 0;
+    }
+  }
+  /* ********************************************************************** */
 //  void Rand_Init(){
 //    this->m>Rand_Init();// mutate 100%
 //  }
