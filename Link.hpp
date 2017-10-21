@@ -35,6 +35,10 @@ public:
   void Attach_Genome(MatrixPtr genome0) {
     this->genome=genome0;
   }
+  /* ********************************************************************** */
+  void Clear_State() {
+    this->state->Fill(1.0);
+  }
   #if LinkOrg
   /* ********************************************************************** */
   void Run_Org() {

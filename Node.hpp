@@ -44,6 +44,16 @@ public:
     }
   }
   /* ********************************************************************** */
+  void Clear_State() {
+    this->CrossRoads->Fill(1.0);
+    LinkPtr ups;
+    size_t siz = this->InLinks.size();
+    for (size_t cnt=0; cnt<siz; cnt++) {
+      ups = this->InLinks.at(cnt);
+      ups->Clear_State();
+    }
+  }
+  /* ********************************************************************** */
   void Link_Apply(std::function<void(LinkPtr)> LinkFunc) {// apply whatever function to every link
     LinkPtr ups;
     size_t siz = this->InLinks.size();
@@ -77,7 +87,11 @@ public:
     for (int cnt=0;cnt<VecTradeSize;cnt++){
       OutVal += this->CrossRoads->ray.at(cnt);
     }
-    return OutVal/VecTradeSize;// average?
+    double result = OutVal/VecTradeSize;// average
+//    if (std::fabs(result)>1.0){
+//      printf("Node::Get_Output error:%f", result);
+//    }
+    return ActFun(OutVal);
   }
   /* ********************************************************************** */
   void Collect_And_Fire() {

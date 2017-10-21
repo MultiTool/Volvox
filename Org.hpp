@@ -14,6 +14,7 @@ public:
   bool Doomed = false;
   //MatrixPtr matrix;
   static const int DefaultWdt = 5, DefaultHgt = 5;
+  //static const int DefaultWdt = 8, DefaultHgt = 8;
   /* ********************************************************************** */
   Org(int wdt0, int hgt0) : Matrix(wdt0, hgt0) {
   }
@@ -30,7 +31,8 @@ public:
     return child;
   }
   /* ********************************************************************** */
-  void ClearScores() {
+  void Reset() {
+    Doomed = false;
     for (int cnt=0;cnt<NumScores;cnt++){
       this->Score[NumScores] = 0;
     }
@@ -55,25 +57,6 @@ public:
     }
     return 0;
   }
-  /* ********************************************************************** */
-//  double Compare(VectPtr other){// strictly for genalg scoring
-//    int ln = std::min(this->len, other->len);
-//    double range = 2.0;
-//    double val0, val1, digival0, digival1, diff, digidiff, digiscore;
-//    double singlescore, score = 1.0;
-//    for (int cnt=0;cnt<ln;cnt++){
-//      digival0 =  std::copysign(1.0, this->ray[cnt]);
-//      digival1 =  std::copysign(1.0, other->ray[cnt]);
-//      digidiff=std::fabs(digival0-digival1);
-//      digiscore+=(range-digidiff)/range;
-//      val0 =  this->ray[cnt];
-//      val1 =  other->ray[cnt];
-//      diff=std::fabs(val0-val1);
-//      singlescore=(range-diff)/range;
-//      score*=singlescore;
-//    }
-//    return score;
-//  }
 };
 
 #endif // ORG_HPP_INCLUDED

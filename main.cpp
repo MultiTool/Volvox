@@ -10,7 +10,10 @@ using namespace std;
 
 int main() {
   cout << "Hello world!" << endl;
-  srand (time(NULL));
+  time_t timer = time(NULL);
+  //timer = 1508332512;
+  printf("randseed:%lld\n", (long long)timer);
+  srand(timer);
   char name[256];
   PopPtr pop = new Pop();
   pop->Evolve();

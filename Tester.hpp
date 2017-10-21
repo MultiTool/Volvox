@@ -134,11 +134,7 @@ public:
   TesterNet(){
     this->MxWdt=ModelWdt; this->MxHgt=ModelHgt;
     this->model = new Matrix(ModelWdt, ModelHgt);
-    double Mag=0.0;
-    do {
-      this->model->Rand_Init();// mutate 100%
-      Mag = this->model->Magnitude();
-    } while (Mag<2.0);
+    Scramble_Model();
     printf("Model:\n");
     this->model->Print_Me();
     printf("\n");
@@ -153,8 +149,16 @@ public:
     delete BPNet;
   }
   /* ********************************************************************** */
+  void Scramble_Model() {// once per generation
+    double Mag=0.0;
+    do {
+      this->model->Rand_Init();// mutate 100%
+      Mag = this->model->Magnitude();
+    } while (Mag<2.0);
+  }
+  /* ********************************************************************** */
   void Reset_Input() override {// once per generation
-    this->model->Rand_Init();// do we want to do this?
+    Scramble_Model();
     this->ModelStateSeed->Rand_Init();
   }
   /* ********************************************************************** */
@@ -163,6 +167,7 @@ public:
   /* ********************************************************************** */
   void Test(OrgPtr candidate) override {
     this->BPNet->Attach_Genome(candidate);
+    this->BPNet->Clear_State();
     Vect ModelState(Total_Node_Number);
     Vect Xfer(External_Node_Number);//, outvec(External_Node_Number);
     ModelState.Copy_From(ModelStateSeed);

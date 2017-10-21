@@ -154,10 +154,13 @@ public:
       val1 =  other->ray[cnt];
       diff=std::fabs(val0-val1);
       singlescore=(range-diff)/range;
-      if (singlescore>1.0){
+      if (std::fabs(singlescore)>1.0){
         printf("Matrix error:%f",singlescore);
       }
       score*=singlescore;
+    }
+    if (score>1.0){
+      printf("Score_Similarity error:%f",score);
     }
     return score;
   }

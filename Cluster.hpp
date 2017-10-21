@@ -64,6 +64,15 @@ public:
     }
   }
   /* ********************************************************************** */
+  void Clear_State() {
+    NodePtr ndp;
+    size_t siz = this->NodeList.size();
+    for (size_t cnt=0; cnt<siz; cnt++) {
+      ndp = this->NodeList.at(cnt);
+      ndp->Clear_State();
+    }
+  }
+  /* ********************************************************************** */
   void Push_Fire() {
     NodePtr ndp;
     size_t siz = this->NodeList.size();

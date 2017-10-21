@@ -5,8 +5,8 @@
 #include "Tester.hpp"
 
 //#define popmax 1000
-#define popmax 100
-//#define popmax 10
+//#define popmax 100
+#define popmax 10
 
 /* ********************************************************************** */
 class Pop;
@@ -20,12 +20,12 @@ public:
   double avgnumwinners = 0.0;
   TesterPtr tester;// crucible
   uint32_t GenCnt;
-  const double MutRate=0.2;//0.2;//0.3;//0.8//0.6;//
+  const double MutRate=0.2;//0.2;//0.3;//0.8//0.6;//0.99;//
   const int MaxOrgGens = 1000;
   const int MaxRetries = 1;//16;
   double SurvivalRate=0.2;//0.5;
   size_t NumSurvivors;
-  double SumScores=0, AvgTopScore=0.0;
+  double SumScores=0, AvgTopDigi=0.0;
   /* ********************************************************************** */
   Pop() : Pop(popmax) {
   }
@@ -57,6 +57,14 @@ public:
     NumSurvivors = popsize * SurvivalRate;
     SumScores=0;
   }
+  /*
+We want this instead:
+mutate
+test, score
+sort
+report (print)
+reproduce (birth and death)
+  */
   /* ********************************************************************** */
   void Evolve() {// evolve for generations
     uintmax_t EvoStagnationLimit = 100;//75;//50;
@@ -87,11 +95,11 @@ public:
     }
   }
   /* ********************************************************************** */
-  double GetTopScore() {// not working yet
+  double GetTopScore() {
     OrgPtr TopOrg = ScoreDexv[0];
     double TopScore = TopOrg->Score[0];
     if (TopScore>1.0){
-      printf("Pop error:%f", TopScore);
+      //printf("Pop error:%f", TopScore);
     }
     return TopScore;
   }
@@ -103,7 +111,7 @@ public:
       org = ScoreDexv.at(pcnt);
       org->Rand_Init();
     }
-    this->GenCnt=0; SumScores=0.0; AvgTopScore=0.0;
+    this->GenCnt=0; SumScores=0.0; AvgTopDigi=0.0;
   }
   /* ********************************************************************** */
   void Clear() {// is it really necessary to be able to clear without just deleting the population?
@@ -136,9 +144,9 @@ public:
     double TopDigiScore = TopOrg->Score[1];
     Birth_And_Death();
     SumScores+=TopDigiScore;
-    //AvgTopScore=SumScores/this->GenCnt;
-    AvgTopScore=(AvgTopScore*0.9) + (TopDigiScore*0.1);
-    printf("GenCnt:%4d, TopScore:%f, AvgTopScore:%f, TopDigiScore::%f\n", this->GenCnt, TopScore, AvgTopScore, TopDigiScore);
+    //AvgTopDigi=SumScores/this->GenCnt;
+    AvgTopDigi=(AvgTopDigi*0.9) + (TopDigiScore*0.1);
+    printf("GenCnt:%4d, TopScore:%f, AvgTopDigi:%f, TopDigiScore::%f\n", this->GenCnt, TopScore, AvgTopDigi, TopDigiScore);
     this->GenCnt++;
   }
   /* ********************************************************************** */
@@ -155,8 +163,8 @@ public:
 
     double TopScore = TopOrg->Score[0];
     double TopDigiScore = TopOrg->Score[1];
-    AvgTopScore=(AvgTopScore*0.9) + (TopDigiScore*0.1);
-    printf("GenCnt:%i, TopScore:%f, AvgTopScore:%f, TopDigiScore::%f\n", this->GenCnt, TopScore, AvgTopScore, TopDigiScore);
+    AvgTopDigi=(AvgTopDigi*0.9) + (TopDigiScore*0.1);
+    printf("GenCnt:%i, TopScore:%f, AvgTopDigi:%f, TopDigiScore::%f\n", this->GenCnt, TopScore, AvgTopDigi, TopDigiScore);
   }
   /* ********************************************************************** */
   double AvgBeast() {
@@ -177,7 +185,7 @@ public:
   }
   void Sort() {
     std::random_shuffle(ScoreDexv.begin(), ScoreDexv.end());
-    std::sort (ScoreDexv.begin(), ScoreDexv.end(), DescendingScore);
+    std::sort(ScoreDexv.begin(), ScoreDexv.end(), DescendingScore);
   }
   /* ********************************************************************** */
   void Birth_And_Death() {
@@ -187,7 +195,7 @@ public:
     topcnt = 0;
     for (cnt=0; cnt<NumSurvivors; cnt++) {
       survivor = ScoreDexv[cnt];
-      survivor->ClearScores();
+      survivor->Reset();
     }
     for (cnt=NumSurvivors; cnt<siz; cnt++) {
       doomed = ScoreDexv[cnt]; doomed->Doomed = true;
