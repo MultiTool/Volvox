@@ -136,10 +136,10 @@ public:
     printf("\n");
   }
   /* ********************************************************************** */
-  double Score_Similarity(VectPtr other, double &digiscore){// strictly for genalg scoring
-    int ln = std::min(this->len, other->len);
+  double Score_Similarity(VectPtr other, int Length, double &digiscore){// strictly for genalg scoring
+    int ln = std::min(std::min(this->len, other->len), Length);
     double range = 2.0;
-    double val0, val1, digival0, digival1, diff, digidiff;
+    double val0, val1, digival0, digival1, diff, digidiff, DigiProduct;
     double singlescore, score = 1.0;
     digiscore=0.0;
     if (ln<=0){
@@ -148,8 +148,13 @@ public:
     for (int cnt=0;cnt<ln;cnt++){
       digival0 =  std::copysign(1.0, this->ray[cnt]);
       digival1 =  std::copysign(1.0, other->ray[cnt]);
-      digidiff=std::fabs(digival0-digival1);
-      digiscore+=(range-digidiff)/range;
+      if (true){
+        DigiProduct=digival0*digival1;
+        digiscore+=DigiProduct;
+      }else{
+        digidiff=std::fabs(digival0-digival1);
+        digiscore+=(range-digidiff)/range;
+      }
       val0 =  this->ray[cnt];
       val1 =  other->ray[cnt];
       diff=std::fabs(val0-val1);
@@ -232,10 +237,15 @@ public:
   void MultFire(Vect* invec, Vect* outvec) {
     VectPtr vec;
     double Fire;
-    for (int cnt=0; cnt<this->hgt; cnt++) {
+    int outlen = std::min(this->hgt, outvec->len);
+    int cnt=0;
+    for (cnt=0; cnt<outlen; cnt++) {
       vec=this->ray[cnt];
       Fire = vec->MultFire(invec);
       outvec->ray[cnt]=Fire;
+    }
+    for (cnt=outlen; cnt<outvec->len; cnt++) {// fill in whatever remains of outvec
+      outvec->ray[cnt]=0.0;
     }
   }
   /* ********************************************************************** */

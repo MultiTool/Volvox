@@ -5,11 +5,14 @@
 #include "Tester.hpp"
 
 //#define popmax 1000
-//#define popmax 100
-#define popmax 10
+#define popmax 100
+//#define popmax 20
+//#define popmax 10
+//#define popmax 5
+//#define popmax 2
 
 /* ********************************************************************** */
-class Pop;
+class Pop;// forward
 typedef Pop *PopPtr;
 class Pop {
 public:
@@ -20,10 +23,10 @@ public:
   double avgnumwinners = 0.0;
   TesterPtr tester;// crucible
   uint32_t GenCnt;
-  const double MutRate=0.2;//0.2;//0.3;//0.8//0.6;//0.99;//
-  const int MaxOrgGens = 1000;
+  const double SurvivalRate=0.2;//0.02;//0.05;//0.5;
+  const double MutRate=0.2;//0.5;//0.3;//0.8//0.6;//0.99;//
+  const int MaxOrgGens = 10000;//10000;
   const int MaxRetries = 1;//16;
-  double SurvivalRate=0.2;//0.5;
   size_t NumSurvivors;
   double SumScores=0, AvgTopDigi=0.0;
   /* ********************************************************************** */
@@ -48,11 +51,19 @@ public:
       org = Org::Abiogenate();
       ScoreDexv.at(pcnt) = org;
     }
-    if (false){
+    switch (2){
+    case 0:
       tester=new TesterMx(Org::DefaultWdt, Org::DefaultHgt);
-    }else{
+      break;
+    case 1:
       tester=new TesterNet();
+      break;
+    case 2:
+      tester=new TesterMxLoop(Org::DefaultWdt, Org::DefaultHgt);
+      break;
+    default:break;
     }
+
     this->GenCnt=0;
     NumSurvivors = popsize * SurvivalRate;
     SumScores=0;
@@ -67,7 +78,7 @@ reproduce (birth and death)
   */
   /* ********************************************************************** */
   void Evolve() {// evolve for generations
-    uintmax_t EvoStagnationLimit = 100;//75;//50;
+    uintmax_t EvoStagnationLimit = 5000;//100;//75;//50;
     for (int RetryCnt=0;RetryCnt<MaxRetries;RetryCnt++){
       double CurrentTopScore, TopScore = 0.0;
       int AbortCnt=0;
@@ -75,9 +86,10 @@ reproduce (birth and death)
         this->Gen();
         CurrentTopScore=this->GetTopScore();
         if (TopScore<CurrentTopScore){
+          // printf("AbortCnt:%i\n", AbortCnt);
           AbortCnt=0; TopScore=CurrentTopScore;
         }else{
-          AbortCnt++; // stopping condition: if best score hasn't improved in 50 generations, bail.
+          AbortCnt++; // stopping condition: if best score hasn't improved in EvoStagnationLimit generations, bail.
           if (AbortCnt>EvoStagnationLimit){ break; }
         }
       }
@@ -131,7 +143,7 @@ reproduce (birth and death)
   void Gen_No_Mutate() { // call this by itself to 'coast', reproduce and winnow generations without mutation.
     uint32_t popsize = this->ScoreDexv.size();
     OrgPtr candidate;
-    if (false){
+    if (true){
       tester->Reset_Input();
     }
     for (uint32_t pcnt=0; pcnt<popsize; pcnt++) {
@@ -146,12 +158,16 @@ reproduce (birth and death)
     SumScores+=TopDigiScore;
     //AvgTopDigi=SumScores/this->GenCnt;
     AvgTopDigi=(AvgTopDigi*0.9) + (TopDigiScore*0.1);
-    printf("GenCnt:%4d, TopScore:%f, AvgTopDigi:%f, TopDigiScore::%f\n", this->GenCnt, TopScore, AvgTopDigi, TopDigiScore);
+    if (this->GenCnt % 10 == 0){
+      //printf("GenCnt:%4d, TopScore:%f, AvgTopDigi:%f, TopDigiScore::%f\n", this->GenCnt, TopScore, AvgTopDigi, TopDigiScore);
+      //printf("GenCnt:%4d, TopScore:%f, TopDigiScore:%f\n", this->GenCnt, TopScore, TopDigiScore);
+      printf("GenCnt:%4d, TopScore:%24.17g, TopDigiScore:%f\n", this->GenCnt, TopScore, TopDigiScore);
+    }
     this->GenCnt++;
   }
   /* ********************************************************************** */
   void Print_Results() {
-    printf("Print_Results\n");
+    //printf("Print_Results\n");
     OrgPtr TopOrg = ScoreDexv[0];
 
     if (false){
@@ -164,7 +180,8 @@ reproduce (birth and death)
     double TopScore = TopOrg->Score[0];
     double TopDigiScore = TopOrg->Score[1];
     AvgTopDigi=(AvgTopDigi*0.9) + (TopDigiScore*0.1);
-    printf("GenCnt:%i, TopScore:%f, AvgTopDigi:%f, TopDigiScore::%f\n", this->GenCnt, TopScore, AvgTopDigi, TopDigiScore);
+    //printf("GenCnt:%i, TopScore:%f, AvgTopDigi:%f, TopDigiScore:%f\n", this->GenCnt, TopScore, AvgTopDigi, TopDigiScore);
+    printf("GenCnt:%4d, TopScore:%24.17g, TopDigiScore:%f\n", this->GenCnt, TopScore, TopDigiScore);
   }
   /* ********************************************************************** */
   double AvgBeast() {

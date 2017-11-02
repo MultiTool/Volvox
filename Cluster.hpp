@@ -124,7 +124,7 @@ public:
     size_t cnt;
     NodePtr ndp;
     printf(" --------------------------------\n");
-    printf(" Cluster ClusterNum:%li, this:%p, ", ClusterNum, this);
+    printf(" Cluster ClusterNum:%i, this:%p, ", ClusterNum, this);
     size_t siz = this->NodeList.size();
     printf(" num nodes:%li\n", siz);
     for (cnt=0; cnt<siz; cnt++) {

@@ -22,9 +22,6 @@ public:
   virtual void Reset_Input() {
   }
   /* ********************************************************************** */
-  virtual void Test() {
-  }
-  /* ********************************************************************** */
   virtual void Test(OrgPtr candidate) {
   }
   /* ********************************************************************** */
@@ -77,9 +74,6 @@ public:
     }
   }
   /* ********************************************************************** */
-  void Test() override {
-  }
-  /* ********************************************************************** */
   void Test(OrgPtr candidate) override {
     // Run the candidate and the model and compare their outputs.
     double val0, val1, diff;
@@ -110,6 +104,108 @@ public:
   /* ********************************************************************** */
   void Print_Me() override {
     this->model->Print_Me();
+  }
+};
+
+/* ********************************************************************** */
+class TesterMxLoop;// forward
+typedef TesterMxLoop *TesterMxLoopPtr;
+typedef std::vector<TesterMxLoopPtr> TesterMxLoopVec;
+class TesterMxLoop : public Tester {// evolve to create a mirror of a continuous behavior
+public:
+  const static uint32_t TestRuns = 100;
+  int External_Node_Number=-1, Total_Node_Number=-1;
+  MatrixPtr model;// behavior to imitate
+  int MxWdt, MxHgt;
+  int ModelIterations=1;
+  VectPtr ModelStateSeed;
+  /* ********************************************************************** */
+  TesterMxLoop(int MxWdt0, int MxHgt0){
+    this->MxWdt=MxHgt0; this->MxHgt=MxHgt0;
+    this->model = new Matrix(MxWdt0, MxHgt0);
+    External_Node_Number=MxWdt0/2; Total_Node_Number=MxWdt0-External_Node_Number;
+    Scramble_Model();
+    printf("Model:\n");
+    this->model->Print_Me();
+    printf("\n");
+    ModelStateSeed = new Vect(Total_Node_Number);
+    ModelStateSeed->Rand_Init();
+  }
+  /* ********************************************************************** */
+  ~TesterMxLoop(){
+    delete ModelStateSeed;
+    delete this->model;
+  }
+  /* ********************************************************************** */
+  void Scramble_Model() {// once per generation
+    double Mag=0.0;
+    do {
+      this->model->Rand_Init();// mutate 100%
+      Mag = this->model->Magnitude();
+    } while (Mag<2.0);
+  }
+  /* ********************************************************************** */
+  void Reset_Input() override {// once per generation
+    this->ModelStateSeed->Rand_Init();
+  }
+  /* ********************************************************************** */
+  void Test(OrgPtr candidate) override {
+    Vect ModelState(Total_Node_Number);
+    Vect OrgState(Total_Node_Number);
+    ModelState.Copy_From(ModelStateSeed);
+    double onescore, score, digiscore, sumdigiscore;
+    int OneBitDex = External_Node_Number-1;
+    double PerfectDigi = External_Node_Number*TestRuns;// maximum possible digital score
+    int vcnt=0;
+    if (false){
+      while (vcnt<10){// running start
+        ModelState.ray[OneBitDex]=1.0;
+        OrgState.Copy_From(&ModelState, External_Node_Number);// duplicate inputs so model and network have the same inputs
+        model->Iterate(&ModelState, ModelIterations, &ModelState);
+        candidate->Iterate(&OrgState, ModelIterations, &OrgState);
+        vcnt++;
+      }
+    }
+
+    // Scoring loop
+    score=1.0;
+    sumdigiscore=0;
+    while (vcnt<TestRuns){
+      ModelState.ray[OneBitDex]=1.0;
+      OrgState.Copy_From(&ModelState, External_Node_Number);// duplicate inputs so model and network have the same inputs
+      model->Iterate(&ModelState, ModelIterations, &ModelState);
+      candidate->Iterate(&OrgState, ModelIterations, &OrgState);
+      // here we want to compare the outputs and score the Org. compare outvec with the external parts of ModelState
+      onescore = OrgState.Score_Similarity(&ModelState, External_Node_Number, digiscore);
+      if (onescore>1.0){
+        printf("Tester error:%f",onescore);
+      }
+      score *= onescore;
+      if (score>1.0){
+        printf("Tester error:%f",score);
+      }
+      sumdigiscore+=digiscore;
+      vcnt++;
+    }
+    if (true){// score mainly by product of all closenesses.
+      candidate->Score[0]=score;
+      //candidate->Score[1]=sumdigiscore;
+      candidate->Score[1]=sumdigiscore/PerfectDigi;
+    }else{// score mainly by digital difference
+      candidate->Score[0]=sumdigiscore/PerfectDigi;
+      candidate->Score[1]=score;
+    }
+  }
+  /* ********************************************************************** */
+  void Print_Me() override {
+    //printf("TesterMxLoop class not implemented yet.\n");
+  }
+  /* ********************************************************************** */
+  double Dry_Run_Test() {
+    return 0;
+  }
+  /* ********************************************************************** */
+  void Run_Test() {
   }
 };
 
@@ -145,6 +241,7 @@ public:
   }
   /* ********************************************************************** */
   ~TesterNet(){
+    delete ModelStateSeed;
     delete this->model;
     delete BPNet;
   }
@@ -160,9 +257,6 @@ public:
   void Reset_Input() override {// once per generation
     Scramble_Model();
     this->ModelStateSeed->Rand_Init();
-  }
-  /* ********************************************************************** */
-  void Test() override {
   }
   /* ********************************************************************** */
   void Test(OrgPtr candidate) override {
@@ -206,7 +300,7 @@ public:
       this->BPNet->Fire_Gen();
       this->BPNet->Get_Outputs(&Xfer);
       // here we want to compare the outputs and score the Org. compare outvec with the external parts of ModelState
-      onescore = Xfer.Score_Similarity(&ModelState, digiscore);
+      onescore = Xfer.Score_Similarity(&ModelState, External_Node_Number, digiscore);
       if (onescore>1.0){
         printf("Tester error:%f",onescore);
       }
