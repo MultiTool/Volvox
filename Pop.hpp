@@ -51,7 +51,7 @@ public:
       org = Org::Abiogenate();
       ScoreDexv.at(pcnt) = org;
     }
-    switch (2){
+    switch (1){
     case 0:
       tester=new TesterMx(Org::DefaultWdt, Org::DefaultHgt);
       break;
@@ -70,11 +70,16 @@ public:
   }
   /*
 We want this instead:
-mutate
-test, score
-sort
+mutate children
+test, score, sort
 report (print)
 reproduce (birth and death)
+
+or this?
+test, score, sort
+report (print)
+reproduce (birth and death)
+mutate children
   */
   /* ********************************************************************** */
   void Evolve() {// evolve for generations
@@ -107,6 +112,63 @@ reproduce (birth and death)
     }
   }
   /* ********************************************************************** */
+  void Gen() { // each generation
+    this->Gen_No_Mutate();
+    this->Mutate(MutRate, MutRate);
+  }
+  /* ********************************************************************** */
+  void Gen_No_Mutate() { // call this by itself to 'coast', reproduce and winnow generations without mutation.
+    Score_And_Sort();
+    Collect_Stats();
+    Birth_And_Death();
+    this->GenCnt++;
+  }
+  /* ********************************************************************** */
+  void Score_And_Sort() {
+    uint32_t popsize = this->ScoreDexv.size();
+    OrgPtr candidate;
+    if (false){
+      tester->Reset_Input();
+    }
+    for (uint32_t pcnt=0; pcnt<popsize; pcnt++) {
+      candidate = ScoreDexv[pcnt];
+      tester->Test(candidate);
+    }
+    Sort();
+  }
+  /* ********************************************************************** */
+  void Collect_Stats() {
+    OrgPtr TopOrg = ScoreDexv[0];
+    double TopScore = TopOrg->Score[0];
+    double TopDigiScore = TopOrg->Score[1];
+    SumScores+=TopDigiScore;
+    //AvgTopDigi=SumScores/this->GenCnt;
+    AvgTopDigi=(AvgTopDigi*0.9) + (TopDigiScore*0.1);
+    if (this->GenCnt % 10 == 0){
+      //printf("GenCnt:%4d, TopScore:%f, AvgTopDigi:%f, TopDigiScore::%f\n", this->GenCnt, TopScore, AvgTopDigi, TopDigiScore);
+      //printf("GenCnt:%4d, TopScore:%f, TopDigiScore:%f\n", this->GenCnt, TopScore, TopDigiScore);
+      printf("GenCnt:%4d, TopScore:%24.17g, TopDigiScore:%f\n", this->GenCnt, TopScore, TopDigiScore);
+    }
+  }
+  /* ********************************************************************** */
+  void Print_Results() {
+    //printf("Print_Results\n");
+    OrgPtr TopOrg = ScoreDexv[0];
+
+    if (false){
+      printf("Model Matrix\n");
+      tester->Print_Me();
+      printf("Top Matrix\n");
+      TopOrg->Print_Me();
+    }
+
+    double TopScore = TopOrg->Score[0];
+    double TopDigiScore = TopOrg->Score[1];
+    AvgTopDigi=(AvgTopDigi*0.9) + (TopDigiScore*0.1);
+    //printf("GenCnt:%i, TopScore:%f, AvgTopDigi:%f, TopDigiScore:%f\n", this->GenCnt, TopScore, AvgTopDigi, TopDigiScore);
+    printf("GenCnt:%4d, TopScore:%24.17g, TopDigiScore:%f\n", this->GenCnt, TopScore, TopDigiScore);
+  }
+  /* ********************************************************************** */
   double GetTopScore() {
     OrgPtr TopOrg = ScoreDexv[0];
     double TopScore = TopOrg->Score[0];
@@ -133,55 +195,6 @@ reproduce (birth and death)
       delete ScoreDexv.at(pcnt);
     }
     delete tester;
-  }
-  /* ********************************************************************** */
-  void Gen() { // each generation
-    this->Gen_No_Mutate();
-    this->Mutate(MutRate, MutRate);
-  }
-  /* ********************************************************************** */
-  void Gen_No_Mutate() { // call this by itself to 'coast', reproduce and winnow generations without mutation.
-    uint32_t popsize = this->ScoreDexv.size();
-    OrgPtr candidate;
-    if (true){
-      tester->Reset_Input();
-    }
-    for (uint32_t pcnt=0; pcnt<popsize; pcnt++) {
-      candidate = ScoreDexv[pcnt];
-      tester->Test(candidate);
-    }
-    Sort();
-    OrgPtr TopOrg = ScoreDexv[0];
-    double TopScore = TopOrg->Score[0];
-    double TopDigiScore = TopOrg->Score[1];
-    Birth_And_Death();
-    SumScores+=TopDigiScore;
-    //AvgTopDigi=SumScores/this->GenCnt;
-    AvgTopDigi=(AvgTopDigi*0.9) + (TopDigiScore*0.1);
-    if (this->GenCnt % 10 == 0){
-      //printf("GenCnt:%4d, TopScore:%f, AvgTopDigi:%f, TopDigiScore::%f\n", this->GenCnt, TopScore, AvgTopDigi, TopDigiScore);
-      //printf("GenCnt:%4d, TopScore:%f, TopDigiScore:%f\n", this->GenCnt, TopScore, TopDigiScore);
-      printf("GenCnt:%4d, TopScore:%24.17g, TopDigiScore:%f\n", this->GenCnt, TopScore, TopDigiScore);
-    }
-    this->GenCnt++;
-  }
-  /* ********************************************************************** */
-  void Print_Results() {
-    //printf("Print_Results\n");
-    OrgPtr TopOrg = ScoreDexv[0];
-
-    if (false){
-      printf("Model Matrix\n");
-      tester->Print_Me();
-      printf("Top Matrix\n");
-      TopOrg->Print_Me();
-    }
-
-    double TopScore = TopOrg->Score[0];
-    double TopDigiScore = TopOrg->Score[1];
-    AvgTopDigi=(AvgTopDigi*0.9) + (TopDigiScore*0.1);
-    //printf("GenCnt:%i, TopScore:%f, AvgTopDigi:%f, TopDigiScore:%f\n", this->GenCnt, TopScore, AvgTopDigi, TopDigiScore);
-    printf("GenCnt:%4d, TopScore:%24.17g, TopDigiScore:%f\n", this->GenCnt, TopScore, TopDigiScore);
   }
   /* ********************************************************************** */
   double AvgBeast() {

@@ -156,10 +156,13 @@ public:
     double onescore, score, digiscore, sumdigiscore;
     int OneBitDex = External_Node_Number-1;
     double PerfectDigi = External_Node_Number*TestRuns;// maximum possible digital score
+    static const bool addbit = true;
     int vcnt=0;
     if (false){
       while (vcnt<10){// running start
-        ModelState.ray[OneBitDex]=1.0;
+        if (addbit){
+          ModelState.ray[OneBitDex]=1.0;
+        }
         OrgState.Copy_From(&ModelState, External_Node_Number);// duplicate inputs so model and network have the same inputs
         model->Iterate(&ModelState, ModelIterations, &ModelState);
         candidate->Iterate(&OrgState, ModelIterations, &OrgState);
@@ -171,7 +174,9 @@ public:
     score=1.0;
     sumdigiscore=0;
     while (vcnt<TestRuns){
-      ModelState.ray[OneBitDex]=1.0;
+      if (addbit){
+        ModelState.ray[OneBitDex]=1.0;
+      }
       OrgState.Copy_From(&ModelState, External_Node_Number);// duplicate inputs so model and network have the same inputs
       model->Iterate(&ModelState, ModelIterations, &ModelState);
       candidate->Iterate(&OrgState, ModelIterations, &OrgState);
@@ -219,7 +224,8 @@ public:
   const static uint32_t MaxNeuroGens = 1000;//100;//2000;
   const static uint32_t TestRuns = 10;
   uint32_t DoneThresh = 32;//64; //32; //64;// 128;//16;
-  static const int External_Node_Number=2, Total_Node_Number=External_Node_Number+3;
+  //static const int External_Node_Number=2, Total_Node_Number=External_Node_Number+3;
+  static const int External_Node_Number=2, Total_Node_Number=External_Node_Number*2;
   MatrixPtr model;// behavior to imitate
   static const int ModelWdt=Total_Node_Number, ModelHgt=Total_Node_Number;// size of the big framework net that holds the models
   int MxWdt, MxHgt;
@@ -251,7 +257,8 @@ public:
     do {
       this->model->Rand_Init();// mutate 100%
       Mag = this->model->Magnitude();
-    } while (Mag<2.0);
+      printf("Mag:%f\n", Mag);
+    } while (Mag<1.0);
   }
   /* ********************************************************************** */
   void Reset_Input() override {// once per generation
@@ -267,6 +274,7 @@ public:
     ModelState.Copy_From(ModelStateSeed);
     double onescore, score, digiscore, sumdigiscore;
     int OneBitDex = External_Node_Number-1;
+    double PerfectDigi = External_Node_Number*TestRuns;// maximum possible digital score
     // Learning loop
     for (int vcnt=0;vcnt<MaxNeuroGens;vcnt++){
       ModelState.ray[OneBitDex]=1.0;
@@ -319,7 +327,8 @@ public:
     }
     //printf("score:%f\n", score);
     candidate->Score[0]=score;
-    candidate->Score[1]=sumdigiscore;
+    //candidate->Score[1]=sumdigiscore;
+    candidate->Score[1]=sumdigiscore/PerfectDigi;
 /*
 ok test is:
 model iterates once
