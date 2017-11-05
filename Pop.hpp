@@ -144,7 +144,7 @@ mutate children
     SumScores+=TopDigiScore;
     //AvgTopDigi=SumScores/this->GenCnt;
     AvgTopDigi=(AvgTopDigi*0.9) + (TopDigiScore*0.1);
-    if (this->GenCnt % 10 == 0){
+    if (this->GenCnt % 1 == 0){
       //printf("GenCnt:%4d, TopScore:%f, AvgTopDigi:%f, TopDigiScore::%f\n", this->GenCnt, TopScore, AvgTopDigi, TopDigiScore);
       //printf("GenCnt:%4d, TopScore:%f, TopDigiScore:%f\n", this->GenCnt, TopScore, TopDigiScore);
       printf("GenCnt:%4d, TopScore:%24.17g, TopDigiScore:%f\n", this->GenCnt, TopScore, TopDigiScore);

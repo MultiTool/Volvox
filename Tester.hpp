@@ -221,8 +221,9 @@ typedef std::vector<TesterNetPtr> TesterNetVec;
 class TesterNet : public Tester {// evolve to create a backpropagation learning rule
 public:
   ClusterPtr BPNet;// crucible
-  const static uint32_t MaxNeuroGens = 1000;//100;//2000;
-  const static uint32_t TestRuns = 10;
+  //const static uint32_t MaxNeuroGens = 1000;//100;//2000;
+  const static uint32_t MaxNeuroGens = 0;//100;//2000;
+  const static uint32_t TestRuns = 100;// 10
   uint32_t DoneThresh = 32;//64; //32; //64;// 128;//16;
   //static const int External_Node_Number=2, Total_Node_Number=External_Node_Number+3;
   static const int External_Node_Number=2, Total_Node_Number=External_Node_Number*2;
@@ -277,7 +278,7 @@ public:
     double PerfectDigi = External_Node_Number*TestRuns;// maximum possible digital score
     // Learning loop
     for (int vcnt=0;vcnt<MaxNeuroGens;vcnt++){
-      ModelState.ray[OneBitDex]=1.0;
+      //ModelState.ray[OneBitDex]=1.0;
       Xfer.Copy_From(&ModelState, External_Node_Number);// duplicate inputs so model and network have the same inputs
       if (false){
         printf("ModelState1:\n");
@@ -296,7 +297,7 @@ public:
     sumdigiscore=0;
     //ModelState.Rand_Init();
     for (int vcnt=0;vcnt<TestRuns;vcnt++){
-      ModelState.ray[OneBitDex]=1.0;
+      //ModelState.ray[OneBitDex]=1.0;
       Xfer.Copy_From(&ModelState, External_Node_Number);// duplicate inputs so model and network have the same inputs
 
       model->Iterate(&ModelState, ModelIterations, &ModelState);

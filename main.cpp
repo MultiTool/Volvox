@@ -12,6 +12,11 @@ int main() {
   cout << "Hello world!" << endl;
   time_t timer = time(NULL);
   //timer = 1508332512;
+  //timer = 1509844801; // all zeros with onebit
+  timer = 1509902811;// all zeros
+//Hello world!
+//Mag:2.129535
+
   printf("randseed:%lld\n", (long long)timer);
   srand(timer);
   char name[256];

@@ -14,12 +14,12 @@ public:
   LinkVec InLinks, OutLinks;
   const static int VecTradeSize = 3;
   VectPtr CrossRoads;// meeting place for all links
-  #ifndef LinkOrg
+  #ifdef LinkOrg
+  const static int CrossRoadsSize = VecTradeSize+3;
+  #else
   int Num_Matrix_Iterations = 3;
   MatrixPtr genome;
   const static int CrossRoadsSize = VecTradeSize;
-  #else
-  const static int CrossRoadsSize = VecTradeSize+3;
   #endif // LinkOrg
   /* ********************************************************************** */
   Node() {

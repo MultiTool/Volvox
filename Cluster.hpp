@@ -136,8 +136,12 @@ public:
   void Load_Inputs(VectPtr invec) {
     std::vector<double> *ray = &(invec->ray);
     size_t siz = std::min(ray->size(), this->NodeList.size());//IONodes
+    NodePtr node;
+    double val;
     for (size_t cnt=0; cnt<siz; cnt++) {
-      this->NodeList.at(cnt)->Load_Input(ray->at(cnt));
+      val = ray->at(cnt);
+      node = this->NodeList.at(cnt);
+      node->Load_Input(val);
     }
   }
   /* ********************************************************************** */
