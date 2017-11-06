@@ -29,6 +29,8 @@ public:
   const int MaxRetries = 1;//16;
   size_t NumSurvivors;
   double SumScores=0, AvgTopDigi=0.0;
+  double AllTimeTopScore=0.0;
+  double CurrentTopScore=0.0;
   /* ********************************************************************** */
   Pop() : Pop(popmax) {
   }
@@ -83,16 +85,16 @@ mutate children
   */
   /* ********************************************************************** */
   void Evolve() {// evolve for generations
-    uintmax_t EvoStagnationLimit = 5000;//100;//75;//50;
+    uintmax_t EvoStagnationLimit = 500;//5000;//100;//75;//50;
     for (int RetryCnt=0;RetryCnt<MaxRetries;RetryCnt++){
-      double CurrentTopScore, TopScore = 0.0;
+      double CurrentTopScoreLocal;
+      AllTimeTopScore = 0.0;
       int AbortCnt=0;
       for (int gcnt=0;gcnt<MaxOrgGens;gcnt++){
         this->Gen();
-        CurrentTopScore=this->GetTopScore();
-        if (TopScore<CurrentTopScore){
-          // printf("AbortCnt:%i\n", AbortCnt);
-          AbortCnt=0; TopScore=CurrentTopScore;
+        CurrentTopScoreLocal=this->GetTopScore();
+        if (AllTimeTopScore<CurrentTopScoreLocal){
+          AbortCnt=0; AllTimeTopScore=CurrentTopScoreLocal;
         }else{
           AbortCnt++; // stopping condition: if best score hasn't improved in EvoStagnationLimit generations, bail.
           if (AbortCnt>EvoStagnationLimit){ break; }
@@ -138,16 +140,18 @@ mutate children
   }
   /* ********************************************************************** */
   void Collect_Stats() {
-    OrgPtr TopOrg = ScoreDexv[0];
-    double TopScore = TopOrg->Score[0];
+    OrgPtr TopOrg = this->GetTopOrg();
+    double PrevTopScore = CurrentTopScore;
+    CurrentTopScore = TopOrg->Score[0];
     double TopDigiScore = TopOrg->Score[1];
     SumScores+=TopDigiScore;
     //AvgTopDigi=SumScores/this->GenCnt;
     AvgTopDigi=(AvgTopDigi*0.9) + (TopDigiScore*0.1);
-    if (this->GenCnt % 1 == 0){
-      //printf("GenCnt:%4d, TopScore:%f, AvgTopDigi:%f, TopDigiScore::%f\n", this->GenCnt, TopScore, AvgTopDigi, TopDigiScore);
-      //printf("GenCnt:%4d, TopScore:%f, TopDigiScore:%f\n", this->GenCnt, TopScore, TopDigiScore);
-      printf("GenCnt:%4d, TopScore:%24.17g, TopDigiScore:%f\n", this->GenCnt, TopScore, TopDigiScore);
+    //if (this->GenCnt % 1 == 0){
+    if (this->CurrentTopScore != PrevTopScore){
+      //printf("GenCnt:%4d, CurrentTopScore:%f, AvgTopDigi:%f, TopDigiScore::%f\n", this->GenCnt, CurrentTopScore, AvgTopDigi, TopDigiScore);
+      //printf("GenCnt:%4d, CurrentTopScore:%f, TopDigiScore:%f\n", this->GenCnt, CurrentTopScore, TopDigiScore);
+      printf("GenCnt:%4d, TopScore:%24.17g, TopDigiScore:%f\n", this->GenCnt, CurrentTopScore, TopDigiScore);
     }
   }
   /* ********************************************************************** */
@@ -169,8 +173,13 @@ mutate children
     printf("GenCnt:%4d, TopScore:%24.17g, TopDigiScore:%f\n", this->GenCnt, TopScore, TopDigiScore);
   }
   /* ********************************************************************** */
-  double GetTopScore() {
+  OrgPtr GetTopOrg() {
     OrgPtr TopOrg = ScoreDexv[0];
+    return TopOrg;
+  }
+  /* ********************************************************************** */
+  double GetTopScore() {
+    OrgPtr TopOrg = this->GetTopOrg();
     double TopScore = TopOrg->Score[0];
     if (TopScore>1.0){
       //printf("Pop error:%f", TopScore);

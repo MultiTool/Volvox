@@ -62,6 +62,18 @@ public:
     return sum;
   }
   /* ********************************************************************** */
+  double Weighted_Product(Vect* other) {// https://math.stackexchange.com/questions/1948471/weighted-product-vs-weighted-sum
+    int ln = std::min(this->len, other->len);
+    double product=1.0, weight, sumweights=0.0;
+    for (int cnt=0; cnt<ln; cnt++) {
+      weight = this->ray[cnt];
+      sumweights+=weight;
+      product *= std::pow(other->ray[cnt], weight);
+    }
+    product = std::pow(product, 1.0/sumweights);
+    return product;
+  }
+  /* ********************************************************************** */
   void Scale_Me(double scale) {
     int ln = this->len;
     for (int cnt=0; cnt<ln; cnt++) {

@@ -63,6 +63,11 @@ public:
     }
   }
   /* ********************************************************************** */
+  void Connect2Way(NodePtr other) {// attach upstream node to me
+    this->ConnectIn(other);
+    other->ConnectIn(this);
+  }
+  /* ********************************************************************** */
   void ConnectIn(NodePtr other) {// attach upstream node to me
     LinkPtr ln = new Link();
     ConnectIn(other, ln);

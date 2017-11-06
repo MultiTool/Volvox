@@ -56,6 +56,34 @@ public:
     }
   }
   /* ********************************************************************** */
+  void Self_Connect_Ring() {// Connect all nodes in a ring
+    size_t siz = this->NodeList.size();
+    size_t nextdex;
+    NodePtr prevnode, nextnode;
+    prevnode = this->NodeList.at(siz-1);
+    for (nextdex=0; nextdex<siz; nextdex++) {
+      nextnode = this->NodeList.at(nextdex);
+      nextnode->Connect2Way(prevnode);
+      prevnode=nextnode;
+    }
+  }
+  /* ********************************************************************** */
+  void Create_Hypercube(size_t NDims) {// Create and connect all nodes in a hypercube, so every node has a unique set of neighbors.
+    size_t medex, youdex, mask;
+    size_t siz = 0x1<<NDims;
+    Fill_With_Nodes(siz);
+    NodePtr younode, menode;
+    for (medex=0; medex<siz; medex++) {
+      menode = this->NodeList.at(medex);
+      for (size_t bcnt=0;bcnt<NDims;bcnt++){
+        mask = 0x1<<bcnt;
+        youdex = medex ^ mask;// flip one bit of medex to get an adjacent corner
+        younode = this->NodeList.at(youdex);
+        menode->ConnectIn(younode);
+      }
+    }
+  }
+  /* ********************************************************************** */
   void Attach_Genome(MatrixPtr genome0) {
     NodePtr ndp;
     for (size_t ncnt=0; ncnt<this->NodeList.size(); ncnt++) {

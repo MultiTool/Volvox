@@ -226,7 +226,7 @@ public:
   const static uint32_t TestRuns = 100;// 10
   uint32_t DoneThresh = 32;//64; //32; //64;// 128;//16;
   //static const int External_Node_Number=2, Total_Node_Number=External_Node_Number+3;
-  static const int External_Node_Number=2, Total_Node_Number=External_Node_Number*2;
+  static const int External_Node_Number=3, Total_Node_Number=External_Node_Number*2;
   MatrixPtr model;// behavior to imitate
   static const int ModelWdt=Total_Node_Number, ModelHgt=Total_Node_Number;// size of the big framework net that holds the models
   int MxWdt, MxHgt;
@@ -241,8 +241,14 @@ public:
     printf("Model:\n");
     this->model->Print_Me();
     printf("\n");
-    BPNet = new Cluster(Total_Node_Number);
-    BPNet->Connect_Other_Cluster(BPNet);
+    if (false){
+      BPNet = new Cluster(Total_Node_Number);
+      //BPNet->Connect_Other_Cluster(BPNet);// all to all self. does not work well.
+      BPNet->Self_Connect_Ring();
+    }else{
+      BPNet = new Cluster();
+      BPNet->Create_Hypercube(3);
+    }
     ModelStateSeed = new Vect(Total_Node_Number);
     ModelStateSeed->Rand_Init();
   }

@@ -14,8 +14,8 @@ public:
   bool Doomed = false;
   //MatrixPtr matrix;
   //static const int DefaultWdt = 5, DefaultHgt = 5;
-  //static const int DefaultWdt = 8, DefaultHgt = 8;
-  static const int DefaultWdt = 16, DefaultHgt = 16;
+  static const int DefaultWdt = 8, DefaultHgt = 8;
+  //static const int DefaultWdt = 16, DefaultHgt = 16;
   //static const int DefaultWdt = 18, DefaultHgt = 18;
   //static const int DefaultWdt = 32, DefaultHgt = 32;
   //static const int DefaultWdt = 64, DefaultHgt = 64;
