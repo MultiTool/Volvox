@@ -220,15 +220,17 @@ typedef TesterNet *TesterNetPtr;
 typedef std::vector<TesterNetPtr> TesterNetVec;
 class TesterNet : public Tester {// evolve to create a backpropagation learning rule
 public:
-  ClusterPtr BPNet;// crucible
-  //const static uint32_t MaxNeuroGens = 1000;//100;//2000;
-  const static uint32_t MaxNeuroGens = 0;//100;//2000;
+  ClusterPtr MacroNet;// crucible
+  //const static uint32_t RunningStart = 1000;//100;//2000;
+  const static uint32_t RunningStart = 50;//0;//100;//2000;
   const static uint32_t TestRuns = 100;// 10
   uint32_t DoneThresh = 32;//64; //32; //64;// 128;//16;
-  //static const int External_Node_Number=2, Total_Node_Number=External_Node_Number+3;
-  static const int External_Node_Number=3, Total_Node_Number=External_Node_Number*2;
-  MatrixPtr model;// behavior to imitate
+  static const int External_Node_Number=2, Total_Node_Number=External_Node_Number*2;
   static const int ModelWdt=Total_Node_Number, ModelHgt=Total_Node_Number;// size of the big framework net that holds the models
+  static const int Num_Models=3;
+  double PerfectDigi = Num_Models*TestRuns*External_Node_Number;// maximum possible digital score
+  static const int HCubeDims = 3;
+  std::vector<MatrixPtr> ModelVec;// behavior to imitate
   int MxWdt, MxHgt;
   int ModelIterations=1;
   const static int Num_Invecs = 20;
@@ -236,106 +238,74 @@ public:
   /* ********************************************************************** */
   TesterNet(){
     this->MxWdt=ModelWdt; this->MxHgt=ModelHgt;
-    this->model = new Matrix(ModelWdt, ModelHgt);
-    Scramble_Model();
-    printf("Model:\n");
-    this->model->Print_Me();
+    printf("PerfectDigi:%f, HCubeDims:%i\n", PerfectDigi, HCubeDims);
+    Init_Models();
+    Print_Models();
     printf("\n");
     if (false){
-      BPNet = new Cluster(Total_Node_Number);
-      //BPNet->Connect_Other_Cluster(BPNet);// all to all self. does not work well.
-      BPNet->Self_Connect_Ring();
+      MacroNet = new Cluster(Total_Node_Number);
+      //MacroNet->Connect_Other_Cluster(MacroNet);// all to all self. does not work well.
+      MacroNet->Self_Connect_Ring();
     }else{
-      BPNet = new Cluster();
-      BPNet->Create_Hypercube(3);
+      MacroNet = new Cluster();
+      MacroNet->Create_Hypercube(HCubeDims);
     }
     ModelStateSeed = new Vect(Total_Node_Number);
-    ModelStateSeed->Rand_Init();
+    this->Scramble_ModelStateSeed();
   }
   /* ********************************************************************** */
   ~TesterNet(){
     delete ModelStateSeed;
-    delete this->model;
-    delete BPNet;
-  }
-  /* ********************************************************************** */
-  void Scramble_Model() {// once per generation
-    double Mag=0.0;
-    do {
-      this->model->Rand_Init();// mutate 100%
-      Mag = this->model->Magnitude();
-      printf("Mag:%f\n", Mag);
-    } while (Mag<1.0);
+    Delete_Models();
+    delete MacroNet;
   }
   /* ********************************************************************** */
   void Reset_Input() override {// once per generation
-    Scramble_Model();
-    this->ModelStateSeed->Rand_Init();
+    Scramble_Models();
+    this->Scramble_ModelStateSeed();
   }
   /* ********************************************************************** */
   void Test(OrgPtr candidate) override {
-    this->BPNet->Attach_Genome(candidate);
-    this->BPNet->Clear_State();
+    this->MacroNet->Attach_Genome(candidate);
     Vect ModelState(Total_Node_Number);
-    Vect Xfer(External_Node_Number);//, outvec(External_Node_Number);
-    ModelState.Copy_From(ModelStateSeed);
+    Vect Xfer(External_Node_Number);
     double onescore, score, digiscore, sumdigiscore;
+    double ModelStateMag;
     int OneBitDex = External_Node_Number-1;
-    double PerfectDigi = External_Node_Number*TestRuns;// maximum possible digital score
-    // Learning loop
-    for (int vcnt=0;vcnt<MaxNeuroGens;vcnt++){
-      //ModelState.ray[OneBitDex]=1.0;
-      Xfer.Copy_From(&ModelState, External_Node_Number);// duplicate inputs so model and network have the same inputs
-      if (false){
-        printf("ModelState1:\n");
-        ModelState.Print_Me();
-      }
-      model->Iterate(&ModelState, ModelIterations, &ModelState);
-      if (false){
-        printf("ModelState2:\n");
-        ModelState.Print_Me();
-      }
-      this->BPNet->Load_Inputs(&Xfer);
-      this->BPNet->Fire_Gen();
-    }
-    // Scoring loop
+    MatrixPtr CurrentModel;
     score=1.0;
     sumdigiscore=0;
-    //ModelState.Rand_Init();
-    for (int vcnt=0;vcnt<TestRuns;vcnt++){
-      //ModelState.ray[OneBitDex]=1.0;
-      Xfer.Copy_From(&ModelState, External_Node_Number);// duplicate inputs so model and network have the same inputs
-
-      model->Iterate(&ModelState, ModelIterations, &ModelState);
-      if (false){
-        printf("ModelState3:\n");
-        ModelState.Print_Me();
+    ModelStateMag=1.0;
+    for (int mcnt=0;mcnt<Num_Models;mcnt++){
+      ModelState.Copy_From(ModelStateSeed);
+      this->MacroNet->Clear_State();
+      CurrentModel = this->ModelVec.at(mcnt);
+      for (int vcnt=0;vcnt<RunningStart;vcnt++){// Learning/adapting loop
+        //ModelState.ray[OneBitDex]=1.0;
+        Xfer.Copy_From(&ModelState, External_Node_Number);// duplicate inputs so model and network have the same inputs
+        CurrentModel->Iterate(&ModelState, ModelIterations, &ModelState);
+        this->MacroNet->Load_Inputs(&Xfer);
+        this->MacroNet->Fire_Gen();
       }
-      this->BPNet->Load_Inputs(&Xfer);
-      this->BPNet->Fire_Gen();
-      this->BPNet->Get_Outputs(&Xfer);
-      // here we want to compare the outputs and score the Org. compare outvec with the external parts of ModelState
-      onescore = Xfer.Score_Similarity(&ModelState, External_Node_Number, digiscore);
-      if (onescore>1.0){
-        printf("Tester error:%f",onescore);
+      //ModelState.Rand_Init();
+      for (int vcnt=0;vcnt<TestRuns;vcnt++){// Scoring loop
+        //ModelState.ray[OneBitDex]=1.0;
+        Xfer.Copy_From(&ModelState, External_Node_Number);// duplicate inputs so model and network have the same inputs
+        CurrentModel->Iterate(&ModelState, ModelIterations, &ModelState);
+        this->MacroNet->Load_Inputs(&Xfer);
+        this->MacroNet->Fire_Gen();
+        // Here we compare the outputs and score the Org. Compare outvec with the external parts of ModelState.
+        this->MacroNet->Get_Outputs(&Xfer);
+        onescore = Xfer.Score_Similarity(&ModelState, External_Node_Number, digiscore);
+        score *= onescore;
+        sumdigiscore+=digiscore;
+        //printf("ModelStateMag:%24.17g\n", ModelState.Magnitude());
+        //printf("ModelStateMag:%f\n", ModelState.Magnitude());
       }
-      score *= onescore;
-      if (score>1.0){
-        printf("Tester error:%f",score);
-      }
-      sumdigiscore+=digiscore;
-      //printf("ModelState.Magnitude:%f, Xfer.Magnitude:%f\n", ModelState.Magnitude(), Xfer.Magnitude());
-      if (false){
-      //if (vcnt>2){
-        printf("comparison\n");
-        Xfer.Print_Me();
-        ModelState.Print_Me();
-      }
-    }
-    //printf("score:%f\n", score);
+    }// loop for each model
     candidate->Score[0]=score;
-    //candidate->Score[1]=sumdigiscore;
     candidate->Score[1]=sumdigiscore/PerfectDigi;
+    candidate->ModelStateMag = ModelState.Magnitude();
 /*
 ok test is:
 model iterates once
@@ -347,6 +317,53 @@ model subset output then overwrites bpnet output, becomes input
   /* ********************************************************************** */
   void Print_Me() override {
     //printf("TesterNet class not implemented yet.\n");
+  }
+  /* ********************************************************************** */
+  void Init_Models() {// once per generation
+    MatrixPtr mod;
+    for (int mcnt=0;mcnt<Num_Models;mcnt++){
+      mod = new Matrix(ModelWdt, ModelHgt);
+      Scramble_Model(mod);
+      ModelVec.push_back(mod);
+    }
+  }
+  /* ********************************************************************** */
+  void Delete_Models() {
+    for (int mcnt=0;mcnt<Num_Models;mcnt++){
+      delete ModelVec.at(mcnt);
+    }
+  }
+  /* ********************************************************************** */
+  void Print_Models() {
+    MatrixPtr mod;
+    for (int mcnt=0;mcnt<Num_Models;mcnt++){
+      printf("Model %i:\n", mcnt);
+      ModelVec.at(mcnt)->Print_Me();
+    }
+  }
+  /* ********************************************************************** */
+  void Scramble_Models() {// once per generation
+    for (int mcnt=0;mcnt<Num_Models;mcnt++){
+      Scramble_Model(ModelVec.at(mcnt));
+    }
+  }
+  /* ********************************************************************** */
+  void Scramble_Model(MatrixPtr mod) {// once per generation
+    double Mag=0.0;
+    do {
+      mod->Rand_Init();// mutate 100%
+      Mag = mod->Magnitude();
+      printf("Mag:%f\n", Mag);
+    } while (Mag<1.0);
+  }
+  /* ********************************************************************** */
+  void Scramble_ModelStateSeed() {
+    double Mag=0.0;
+    do {
+      ModelStateSeed->Rand_Init();// mutate 100%
+      Mag = ModelStateSeed->Magnitude();
+      printf("Seed Mag:%f\n", Mag);
+    } while (Mag<1.0);
   }
   /* ********************************************************************** */
   double Dry_Run_Test() {

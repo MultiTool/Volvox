@@ -14,6 +14,7 @@ int main() {
   //timer = 1508332512;
   //timer = 1509844801; // all zeros with onebit
  // timer = 1509902811;// all zeros
+ // randseed:1510056985// with 2 models, goes to score 0.5000 for some reason
 //Hello world!
 //Mag:2.129535
 

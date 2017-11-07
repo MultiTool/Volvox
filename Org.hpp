@@ -12,6 +12,7 @@ public:
   static const int NumScores=2;
   double Score[NumScores];
   bool Doomed = false;
+  double ModelStateMag;
   //MatrixPtr matrix;
   //static const int DefaultWdt = 5, DefaultHgt = 5;
   static const int DefaultWdt = 8, DefaultHgt = 8;

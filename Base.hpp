@@ -95,6 +95,17 @@ double frand_nonzero() {
 double ActFun(double xin) {
   double OutVal;
   OutVal = xin / sqrt(1.0 + xin * xin);/* symmetrical sigmoid function in range -1.0 to 1.0. */
+  //return (OutVal+1.0)/2.0;// all-positive sigmoid range 0 to 1
+  if (false){
+    double MinLimit = 0.01;
+    if (std::fabs(OutVal)<MinLimit){// hack to make zero output less likely
+      if (OutVal==0.0){
+        OutVal=MinLimit;
+      }else{
+        OutVal=std::copysign(MinLimit, OutVal);
+      }
+    }
+  }
   return OutVal;
   /* General formula: double power = 2.0; OutVal = xin / Math.pow(1 + Math.abs(Math.pow(xin, power)), 1.0 / power); */
 }

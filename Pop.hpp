@@ -85,7 +85,7 @@ mutate children
   */
   /* ********************************************************************** */
   void Evolve() {// evolve for generations
-    uintmax_t EvoStagnationLimit = 500;//5000;//100;//75;//50;
+    uintmax_t EvoStagnationLimit = 1500;//5000;//100;//75;//50;
     for (int RetryCnt=0;RetryCnt<MaxRetries;RetryCnt++){
       double CurrentTopScoreLocal;
       AllTimeTopScore = 0.0;
@@ -143,14 +143,16 @@ mutate children
     OrgPtr TopOrg = this->GetTopOrg();
     double PrevTopScore = CurrentTopScore;
     CurrentTopScore = TopOrg->Score[0];
-    double TopDigiScore = TopOrg->Score[1];
-    SumScores+=TopDigiScore;
+    double TopDigiScore = TopOrg->Score[1]; SumScores+=TopDigiScore;
+    double ModelStateMag = TopOrg->ModelStateMag;
+
     //AvgTopDigi=SumScores/this->GenCnt;
     AvgTopDigi=(AvgTopDigi*0.9) + (TopDigiScore*0.1);
     //if (this->GenCnt % 1 == 0){
     if (this->CurrentTopScore != PrevTopScore){
       //printf("GenCnt:%4d, CurrentTopScore:%f, AvgTopDigi:%f, TopDigiScore::%f\n", this->GenCnt, CurrentTopScore, AvgTopDigi, TopDigiScore);
       //printf("GenCnt:%4d, CurrentTopScore:%f, TopDigiScore:%f\n", this->GenCnt, CurrentTopScore, TopDigiScore);
+      //printf("GenCnt:%4d, TopScore:%24.17g, TopDigiScore:%f, ModelStateMag:%f\n", this->GenCnt, CurrentTopScore, TopDigiScore, ModelStateMag);
       printf("GenCnt:%4d, TopScore:%24.17g, TopDigiScore:%f\n", this->GenCnt, CurrentTopScore, TopDigiScore);
     }
   }

@@ -150,7 +150,7 @@ public:
   /* ********************************************************************** */
   double Score_Similarity(VectPtr other, int Length, double &digiscore){// strictly for genalg scoring
     int ln = std::min(std::min(this->len, other->len), Length);
-    double range = 2.0;
+    double range = 2.0;//1.0;//
     double val0, val1, digival0, digival1, diff, digidiff, DigiProduct;
     double singlescore, score = 1.0;
     digiscore=0.0;
@@ -171,6 +171,10 @@ public:
       val1 =  other->ray[cnt];
       diff=std::fabs(val0-val1);
       singlescore=(range-diff)/range;
+      /*
+      average random singlescore will be 0.5.
+      how to adjust?
+      */
       if (std::fabs(singlescore)>1.0){
         printf("Matrix error:%f",singlescore);
       }
