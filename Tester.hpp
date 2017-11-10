@@ -28,10 +28,6 @@ public:
   virtual void Print_Me() {
     printf("Tester base class should be overridden.\n");
   }
-  /* ********************************************************************** */
-  virtual double Dry_Run_Test() {
-    return 0;
-  }
 };
 
 /* ********************************************************************** */
@@ -206,10 +202,6 @@ public:
     //printf("TesterMxLoop class not implemented yet.\n");
   }
   /* ********************************************************************** */
-  double Dry_Run_Test() {
-    return 0;
-  }
-  /* ********************************************************************** */
   void Run_Test() {
   }
 };
@@ -224,21 +216,20 @@ public:
   //const static uint32_t RunningStart = 1000;//100;//2000;
   const static uint32_t RunningStart = 50;//0;//100;//2000;
   const static uint32_t TestRuns = 100;// 10
-  uint32_t DoneThresh = 32;//64; //32; //64;// 128;//16;
-  static const int External_Node_Number=2, Total_Node_Number=External_Node_Number*2;
+  static const int External_Node_Number=3, Total_Node_Number=External_Node_Number*2;
   static const int ModelWdt=Total_Node_Number, ModelHgt=Total_Node_Number;// size of the big framework net that holds the models
-  static const int Num_Models=3;
+  static const int Num_Models=2;
   double PerfectDigi = Num_Models*TestRuns*External_Node_Number;// maximum possible digital score
   static const int HCubeDims = 3;
   std::vector<MatrixPtr> ModelVec;// behavior to imitate
-  int MxWdt, MxHgt;
   int ModelIterations=1;
   const static int Num_Invecs = 20;
   VectPtr ModelStateSeed;//Total_Node_Number);
   /* ********************************************************************** */
   TesterNet(){
-    this->MxWdt=ModelWdt; this->MxHgt=ModelHgt;
     printf("PerfectDigi:%f, HCubeDims:%i\n", PerfectDigi, HCubeDims);
+    ModelStateSeed = new Vect(Total_Node_Number);
+    this->Scramble_ModelStateSeed();
     Init_Models();
     Print_Models();
     printf("\n");
@@ -250,8 +241,6 @@ public:
       MacroNet = new Cluster();
       MacroNet->Create_Hypercube(HCubeDims);
     }
-    ModelStateSeed = new Vect(Total_Node_Number);
-    this->Scramble_ModelStateSeed();
   }
   /* ********************************************************************** */
   ~TesterNet(){
@@ -292,6 +281,7 @@ public:
         //ModelState.ray[OneBitDex]=1.0;
         Xfer.Copy_From(&ModelState, External_Node_Number);// duplicate inputs so model and network have the same inputs
         CurrentModel->Iterate(&ModelState, ModelIterations, &ModelState);
+        //ModelState.Print_Me();
         this->MacroNet->Load_Inputs(&Xfer);
         this->MacroNet->Fire_Gen();
         // Here we compare the outputs and score the Org. Compare outvec with the external parts of ModelState.
@@ -299,7 +289,8 @@ public:
         onescore = Xfer.Score_Similarity(&ModelState, External_Node_Number, digiscore);
         score *= onescore;
         sumdigiscore+=digiscore;
-        //printf("ModelStateMag:%24.17g\n", ModelState.Magnitude());
+        ModelStateMag = ModelState.Magnitude();
+        //printf("ModelStateMag:%24.17g\n", ModelStateMag);
         //printf("ModelStateMag:%f\n", ModelState.Magnitude());
       }
     }// loop for each model
@@ -317,6 +308,36 @@ model subset output then overwrites bpnet output, becomes input
   /* ********************************************************************** */
   void Print_Me() override {
     //printf("TesterNet class not implemented yet.\n");
+  }
+  /* ********************************************************************** */
+  void Profile_Model(MatrixPtr CurrentModel) {
+    int Num_Bins = 16;
+    int Bins[Num_Bins] = {};
+    Vect ModelState(Total_Node_Number);
+    ModelState.Copy_From(ModelStateSeed);
+    ModelState.Print_Me();
+    double Range = ModelState.MaxLen();
+    int BinDex;
+    printf("RunningStart:\n");
+    for (int vcnt=0;vcnt<RunningStart;vcnt++){
+      CurrentModel->Iterate(&ModelState, ModelIterations, &ModelState);
+      // ModelState.Print_Me();
+    }
+    printf("TestRuns:\n");
+    double Percent_Negative=0.0;
+    for (int vcnt=0;vcnt<TestRuns;vcnt++){
+      CurrentModel->Iterate(&ModelState, ModelIterations, &ModelState);
+      ModelState.Print_Me();
+      Percent_Negative+=ModelState.Percent_Negative();
+      BinDex = (ModelState.Magnitude()*Num_Bins)/Range;
+      Bins[BinDex]++;
+    }
+    Percent_Negative/=(double)TestRuns;
+    printf("Percent_Negative:%f\n", Percent_Negative);
+    for (int bcnt=0;bcnt<Num_Bins;bcnt++){
+      printf("%i, ", Bins[bcnt]);
+    }
+    printf("\n");
   }
   /* ********************************************************************** */
   void Init_Models() {// once per generation
@@ -338,7 +359,10 @@ model subset output then overwrites bpnet output, becomes input
     MatrixPtr mod;
     for (int mcnt=0;mcnt<Num_Models;mcnt++){
       printf("Model %i:\n", mcnt);
-      ModelVec.at(mcnt)->Print_Me();
+      mod = ModelVec.at(mcnt);
+      mod->Print_Me();
+      printf("Profile:\n");
+      Profile_Model(mod);
     }
   }
   /* ********************************************************************** */
@@ -366,8 +390,100 @@ model subset output then overwrites bpnet output, becomes input
     } while (Mag<1.0);
   }
   /* ********************************************************************** */
-  double Dry_Run_Test() {
-    return 0;
+  void Run_Test() {
+  }
+};
+
+/* ********************************************************************** */
+class TesterMxWobble;// forward
+typedef TesterMxWobble *TesterMxWobblePtr;
+typedef std::vector<TesterMxWobblePtr> TesterMxWobbleVec;
+class TesterMxWobble : public Tester {// evolve to create models with greater variance in amplitude, to be more interesting
+public:
+  const static uint32_t RunningStart = 50;//0;//100;//2000;
+  const static uint32_t TestRuns = 100;// 10
+  int Num_Bins = 16, Max_Bin = Num_Bins-1;
+  int ModelIterations=1;
+  int MxWdt, MxHgt;
+  VectPtr ModelStateSeed;
+  /* ********************************************************************** */
+  TesterMxWobble(int MxWdt0, int MxHgt0){
+    this->MxWdt=MxHgt0; this->MxHgt=MxHgt0;
+    ModelStateSeed = new Vect(MxWdt0);
+    ModelStateSeed->Rand_Init();
+  }
+  /* ********************************************************************** */
+  ~TesterMxWobble(){
+    delete ModelStateSeed;
+  }
+  /* ********************************************************************** */
+  void Reset_Input() override {// once per generation
+  }
+  /* ********************************************************************** */
+  void Test(OrgPtr candidate) override {
+    int Bins[Num_Bins] = {};
+    Vect ModelState(this->MxWdt);
+    ModelState.Copy_From(ModelStateSeed);
+    double Range = ModelState.MaxLen();
+    double Mag;
+    int BinDex;
+    for (int vcnt=0;vcnt<RunningStart;vcnt++){
+      candidate->Iterate(&ModelState, ModelIterations, &ModelState);
+    }
+    double Percent_Negative=0.0;
+    for (int vcnt=0;vcnt<TestRuns;vcnt++){
+      candidate->Iterate(&ModelState, ModelIterations, &ModelState);
+      Percent_Negative+=ModelState.Percent_Negative();
+      Mag = ModelState.Magnitude();
+      BinDex = (Mag*(double)Max_Bin)/Range;
+      Bins[BinDex]++;
+    }
+    Percent_Negative/=(double)TestRuns;
+    double score = 1.0;
+    for (int bcnt=0;bcnt<Num_Bins;bcnt++){
+       score *= 1.0+(((double)Bins[bcnt])/(double)TestRuns);
+    }
+    candidate->Score[0]=score;
+    candidate->Score[1]=(1.0-Percent_Negative)*Percent_Negative;// favor equal ratio of positive to negative
+  }
+  /* ********************************************************************** */
+  void Print_Me() override {
+    //printf("TesterMxLoop class not implemented yet.\n");
+  }
+  /* ********************************************************************** */
+  void Print_Org(OrgPtr candidate) {
+    printf("Top Org:\n");
+    candidate->Print_Me();
+    printf("\n");
+    int Bins[Num_Bins] = {};
+    Vect ModelState(this->MxWdt);
+    ModelState.Copy_From(ModelStateSeed);
+    ModelState.Print_Me();
+    double Range = ModelState.MaxLen();
+    double Mag;
+    int BinDex;
+    printf("RunningStart:\n");
+    for (int vcnt=0;vcnt<RunningStart;vcnt++){
+      candidate->Iterate(&ModelState, ModelIterations, &ModelState);
+    }
+    printf("TestRuns:\n");
+    double Percent_Negative=0.0;
+    for (int vcnt=0;vcnt<TestRuns;vcnt++){
+      candidate->Iterate(&ModelState, ModelIterations, &ModelState);
+      ModelState.Print_Me();
+      Percent_Negative+=ModelState.Percent_Negative();
+      Mag = ModelState.Magnitude();
+      BinDex = (Mag*(double)Max_Bin)/Range;
+      Bins[BinDex]++;
+    }
+    Percent_Negative/=(double)TestRuns;
+
+    printf("Percent_Negative:%f\n", Percent_Negative);
+    for (int bcnt=0;bcnt<Num_Bins;bcnt++){
+      printf("%i, ", Bins[bcnt]);
+    }
+    printf("\n");
+    printf("Score0:%24.17g, Score1:%24.17g\n", candidate->Score[0], candidate->Score[1]);
   }
   /* ********************************************************************** */
   void Run_Test() {

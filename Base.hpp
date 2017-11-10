@@ -94,6 +94,7 @@ double frand_nonzero() {
 /* ********************************************************************** */
 double ActFun(double xin) {
   double OutVal;
+  //xin+=0.1;// push positive to not settle in zero
   OutVal = xin / sqrt(1.0 + xin * xin);/* symmetrical sigmoid function in range -1.0 to 1.0. */
   //return (OutVal+1.0)/2.0;// all-positive sigmoid range 0 to 1
   if (false){

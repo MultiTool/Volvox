@@ -22,6 +22,7 @@ public:
 
   double avgnumwinners = 0.0;
   TesterPtr tester;// crucible
+  TesterMxWobblePtr wobble = nullptr;
   uint32_t GenCnt;
   const double SurvivalRate=0.2;//0.02;//0.05;//0.5;
   const double MutRate=0.2;//0.5;//0.3;//0.8//0.6;//0.99;//
@@ -62,6 +63,9 @@ public:
       break;
     case 2:
       tester=new TesterMxLoop(Org::DefaultWdt, Org::DefaultHgt);
+      break;
+    case 3:
+      tester = wobble = new TesterMxWobble(Org::DefaultWdt, Org::DefaultHgt);
       break;
     default:break;
     }
@@ -108,6 +112,10 @@ mutate children
         this->Print_Results();
       }
       printf("RetryCnt:%i\n\n", RetryCnt);
+      OrgPtr TopOrg = this->GetTopOrg();
+      if (wobble!=nullptr){
+        wobble->Print_Org(TopOrg);
+      }
       //std::cin.getline(name,256);
 
       this->Restart();

@@ -74,6 +74,15 @@ public:
     return product;
   }
   /* ********************************************************************** */
+  double Percent_Negative() {
+    int ln = this->len;
+    int Num_Negative = 0;
+    for (int cnt=0; cnt<ln; cnt++) {
+      if (this->ray[cnt]<0){ Num_Negative++; }
+    }
+    return ((double)Num_Negative)/(double)ln;
+  }
+  /* ********************************************************************** */
   void Scale_Me(double scale) {
     int ln = this->len;
     for (int cnt=0; cnt<ln; cnt++) {
@@ -93,6 +102,10 @@ public:
   /* ********************************************************************** */
   double Magnitude() {
     return std::sqrt(this->SumOfSquares());
+  }
+  /* ********************************************************************** */
+  double MaxLen() {// assuming the range of every number is -1 to +1
+    return std::sqrt(this->ray.size());
   }
   /* ********************************************************************** */
   double MultFire(Vect* other) {
@@ -160,8 +173,11 @@ public:
     for (int cnt=0;cnt<ln;cnt++){
       digival0 =  std::copysign(1.0, this->ray[cnt]);
       digival1 =  std::copysign(1.0, other->ray[cnt]);
+      //double bleh =  std::copysign(1.0, 0.0);
+      //printf("bleh:%f",  bleh);
       if (true){
         DigiProduct=digival0*digival1;
+        //DigiProduct=(digival0==digival1)?1.0:-1.0;
         digiscore+=DigiProduct;
       }else{
         digidiff=std::fabs(digival0-digival1);
@@ -268,10 +284,12 @@ public:
   void Iterate(Vect* invec, int NumCycles, Vect* outvec) {// recurrent firing
     Vect tempvec(this->hgt);
     tempvec.Copy_From(invec);// safe, more flexible
+    //outvec->Print_Me();
     for (int cnt=0; cnt<NumCycles; cnt++) {// pass through 3 times total
       this->MultFire(&tempvec, outvec);
       tempvec.Copy_From(outvec);
     }
+    //outvec->Print_Me();
   }
   /* ********************************************************************** */
   void Iterate_Persistent(Vect* invec, Vect* outvec) {// recurrent firing

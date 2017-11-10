@@ -18,6 +18,10 @@ int main() {
 //Hello world!
 //Mag:2.129535
 
+  //timer = 1510141712;// 0.930000 final score
+  //timer = 1510148948;// model testing
+
+
   printf("randseed:%lld\n", (long long)timer);
   srand(timer);
   char name[256];
