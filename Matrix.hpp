@@ -129,12 +129,12 @@ public:
   /* ********************************************************************** */
   void Mutate_Me(double MRate) {
     int ln = this->len;
-    double val, amp = 0.3;
+    double val, amp = 2.0;//0.3;
     for (int cnt=0; cnt<ln; cnt++) {
       if (frand()<MRate) {
         val = this->ray[cnt];
-        val += (frand()*2.0-1.0)*amp;
-        //val = (frand()*2.0-1.0)*1.0;// amp = 1.0 here, range -1 to +1
+        val += (frand()*2.0-1.0)*amp;// drift mutation, -amp to +amp
+        //val = (frand()*2.0-1.0)*1.0;// jump mutation. amp = 1.0 here, range -1 to +1
         this->ray[cnt] = val;
       }
     }
@@ -142,11 +142,13 @@ public:
   /* ********************************************************************** */
   void Rand_Init() {
     int ln = this->len;
+    double amp = 4.0;
+    double amp2 = amp*2.0;
     double val;
     for (int cnt=0; cnt<ln; cnt++) {
       val = this->ray[cnt];
-      val = (frand_nonzero()*2.0-1.0);// amp = 1.0 here, range -1 to +1
-      //val = (frand()*2.0-1.0);// amp = 1.0 here, range -1 to +1
+      val = (frand_nonzero()*amp2-amp);// range -amp to +amp
+      //val = (frand()*amp2-amp);// amp = 1.0 here, range -1 to +1
       this->ray[cnt] = val;
     }
   }
@@ -161,32 +163,50 @@ public:
     printf("\n");
   }
   /* ********************************************************************** */
-  double Score_Similarity(VectPtr other, int Length, double &digiscore){// strictly for genalg scoring
+  double Score_Similarity(VectPtr other, int Length, double &digiscore, double &MultiDigiProduct){// strictly for genalg scoring
+  //double Score_Similarity(VectPtr other, int Length, double &digiscore){// strictly for genalg scoring
     int ln = std::min(std::min(this->len, other->len), Length);
     double range = 2.0;//1.0;//
-    double val0, val1, digival0, digival1, diff, digidiff, DigiProduct;
+    double val0, val1, digival0, digival1, diff, digidiff, DigiProduct=1.0;
+    double SingleDigiScore;
     double singlescore, score = 1.0;
-    digiscore=0.0;
+    digiscore=0.0; MultiDigiProduct=1.0;
     if (ln<=0){
       printf("ln error:%d",ln);
     }
     for (int cnt=0;cnt<ln;cnt++){
       digival0 =  std::copysign(1.0, this->ray[cnt]);
       digival1 =  std::copysign(1.0, other->ray[cnt]);
-      //double bleh =  std::copysign(1.0, 0.0);
-      //printf("bleh:%f",  bleh);
-      if (true){
-        DigiProduct=digival0*digival1;
+      switch (0) {
+      case 0:
+        DigiProduct=digival0*digival1;// -1.0 or +1.0
         //DigiProduct=(digival0==digival1)?1.0:-1.0;
         digiscore+=DigiProduct;
-      }else{
-        digidiff=std::fabs(digival0-digival1);
-        digiscore+=(range-digidiff)/range;
+        break;
+      case 1:
+        digidiff=std::fabs(digival0-digival1);// 2.0(worst) or 0.0(best)
+        SingleDigiScore=(range-digidiff)/range;// 0.0(worst) or +1.0(best)
+        digiscore+=SingleDigiScore;// sum
+        break;
+      case 2:
+        digidiff=std::fabs(digival0-digival1);// 2.0(worst) or 0.0(best)
+        SingleDigiScore=(range-digidiff)/range;// 0.0(worst) or +1.0(best)
+        SingleDigiScore=(SingleDigiScore*0.99)+0.01;// +0.1(worst) or +1.0(best)
+        MultiDigiProduct*=SingleDigiScore;// product
+        digiscore=MultiDigiProduct;// ugh, inefficient
+        break;
       }
+
+      digidiff=std::fabs(digival0-digival1);// 2.0(worst) or 0.0(best)
+      SingleDigiScore=(range-digidiff)/range;// 0.0(worst) or +1.0(best)
+      SingleDigiScore=(SingleDigiScore*0.99)+0.01;// +0.1(worst) or +1.0(best)
+      MultiDigiProduct*=SingleDigiScore;// product
+
+      // analog scoring
       val0 =  this->ray[cnt];
       val1 =  other->ray[cnt];
       diff=std::fabs(val0-val1);
-      singlescore=(range-diff)/range;
+      singlescore=(range-diff)/range;// 0.0(worst) to 1.0(best)
       /*
       average random singlescore will be 0.5.
       how to adjust?
@@ -196,6 +216,7 @@ public:
       }
       score*=singlescore;
     }
+
     if (score>1.0){
       printf("Score_Similarity error:%f",score);
     }

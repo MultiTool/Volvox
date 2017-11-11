@@ -149,7 +149,7 @@ public:
     Vect ModelState(Total_Node_Number);
     Vect OrgState(Total_Node_Number);
     ModelState.Copy_From(ModelStateSeed);
-    double onescore, score, digiscore, sumdigiscore;
+    double onescore, score, digiscore, sumdigiscore, DigiProduct;
     int OneBitDex = External_Node_Number-1;
     double PerfectDigi = External_Node_Number*TestRuns;// maximum possible digital score
     static const bool addbit = true;
@@ -177,7 +177,7 @@ public:
       model->Iterate(&ModelState, ModelIterations, &ModelState);
       candidate->Iterate(&OrgState, ModelIterations, &OrgState);
       // here we want to compare the outputs and score the Org. compare outvec with the external parts of ModelState
-      onescore = OrgState.Score_Similarity(&ModelState, External_Node_Number, digiscore);
+      onescore = OrgState.Score_Similarity(&ModelState, External_Node_Number, digiscore, DigiProduct);
       if (onescore>1.0){
         printf("Tester error:%f",onescore);
       }
@@ -218,9 +218,9 @@ public:
   const static uint32_t TestRuns = 100;// 10
   static const int External_Node_Number=3, Total_Node_Number=External_Node_Number*2;
   static const int ModelWdt=Total_Node_Number, ModelHgt=Total_Node_Number;// size of the big framework net that holds the models
-  static const int Num_Models=2;
+  static const int Num_Models=1;
   double PerfectDigi = Num_Models*TestRuns*External_Node_Number;// maximum possible digital score
-  static const int HCubeDims = 3;
+  static const int HCubeDims = 3;//4;
   std::vector<MatrixPtr> ModelVec;// behavior to imitate
   int ModelIterations=1;
   const static int Num_Invecs = 20;
@@ -258,12 +258,12 @@ public:
     this->MacroNet->Attach_Genome(candidate);
     Vect ModelState(Total_Node_Number);
     Vect Xfer(External_Node_Number);
-    double onescore, score, digiscore, sumdigiscore;
+    double onescore, score, digiscore, sumdigiscore, DigiProduct, MultiDigiProduct;
     double ModelStateMag;
     int OneBitDex = External_Node_Number-1;
     MatrixPtr CurrentModel;
     score=1.0;
-    sumdigiscore=0;
+    sumdigiscore=0; MultiDigiProduct=1.0;
     ModelStateMag=1.0;
     for (int mcnt=0;mcnt<Num_Models;mcnt++){
       ModelState.Copy_From(ModelStateSeed);
@@ -286,16 +286,24 @@ public:
         this->MacroNet->Fire_Gen();
         // Here we compare the outputs and score the Org. Compare outvec with the external parts of ModelState.
         this->MacroNet->Get_Outputs(&Xfer);
-        onescore = Xfer.Score_Similarity(&ModelState, External_Node_Number, digiscore);
+        onescore = Xfer.Score_Similarity(&ModelState, External_Node_Number, digiscore, DigiProduct);
         score *= onescore;
         sumdigiscore+=digiscore;
+        MultiDigiProduct *= DigiProduct;
         ModelStateMag = ModelState.Magnitude();
         //printf("ModelStateMag:%24.17g\n", ModelStateMag);
         //printf("ModelStateMag:%f\n", ModelState.Magnitude());
       }
     }// loop for each model
-    candidate->Score[0]=score;
-    candidate->Score[1]=sumdigiscore/PerfectDigi;
+    double ScoreRoot = std::pow(score, 1.0/(double)PerfectDigi);
+    double DigiScoreRoot = std::pow(MultiDigiProduct, 1.0/(double)PerfectDigi);
+    if (false){
+      candidate->Score[0]=ScoreRoot;// analog score is primary
+      candidate->Score[1]=sumdigiscore/PerfectDigi;
+    }else{
+      candidate->Score[0]=DigiScoreRoot;// digital score is primary
+      candidate->Score[1]=ScoreRoot;
+    }
     candidate->ModelStateMag = ModelState.Magnitude();
 /*
 ok test is:

@@ -27,7 +27,7 @@ public:
   const double SurvivalRate=0.2;//0.02;//0.05;//0.5;
   const double MutRate=0.2;//0.5;//0.3;//0.8//0.6;//0.99;//
   const int MaxOrgGens = 10000;//10000;
-  const int MaxRetries = 1;//16;
+  const int MaxRetries = 2;//16;
   size_t NumSurvivors;
   double SumScores=0, AvgTopDigi=0.0;
   double AllTimeTopScore=0.0;
@@ -97,6 +97,7 @@ mutate children
       for (int gcnt=0;gcnt<MaxOrgGens;gcnt++){
         this->Gen();
         CurrentTopScoreLocal=this->GetTopScore();
+        if (CurrentTopScoreLocal>=1.0){ break; }
         if (AllTimeTopScore<CurrentTopScoreLocal){
           AbortCnt=0; AllTimeTopScore=CurrentTopScoreLocal;
         }else{
@@ -161,7 +162,7 @@ mutate children
       //printf("GenCnt:%4d, CurrentTopScore:%f, AvgTopDigi:%f, TopDigiScore::%f\n", this->GenCnt, CurrentTopScore, AvgTopDigi, TopDigiScore);
       //printf("GenCnt:%4d, CurrentTopScore:%f, TopDigiScore:%f\n", this->GenCnt, CurrentTopScore, TopDigiScore);
       //printf("GenCnt:%4d, TopScore:%24.17g, TopDigiScore:%f, ModelStateMag:%f\n", this->GenCnt, CurrentTopScore, TopDigiScore, ModelStateMag);
-      printf("GenCnt:%4d, TopScore:%24.17g, TopDigiScore:%f\n", this->GenCnt, CurrentTopScore, TopDigiScore);
+      printf("GenCnt:%4d, TopScore0:%24.17g, TopScore1:%24.17g\n", this->GenCnt, CurrentTopScore, TopDigiScore);
     }
   }
   /* ********************************************************************** */
@@ -180,7 +181,7 @@ mutate children
     double TopDigiScore = TopOrg->Score[1];
     AvgTopDigi=(AvgTopDigi*0.9) + (TopDigiScore*0.1);
     //printf("GenCnt:%i, TopScore:%f, AvgTopDigi:%f, TopDigiScore:%f\n", this->GenCnt, TopScore, AvgTopDigi, TopDigiScore);
-    printf("GenCnt:%4d, TopScore:%24.17g, TopDigiScore:%f\n", this->GenCnt, TopScore, TopDigiScore);
+    printf("GenCnt:%4d, TopScore0:%24.17g, TopScore%24.17g\n", this->GenCnt, TopScore, TopDigiScore);
   }
   /* ********************************************************************** */
   OrgPtr GetTopOrg() {

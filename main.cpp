@@ -20,7 +20,8 @@ int main() {
 
   //timer = 1510141712;// 0.930000 final score
   //timer = 1510148948;// model testing
-
+  //timer = 1510415166;
+  //timer = 1510422187;// paradiddle GenCnt:1637, TopScore0:     0.69716139996346738, TopScore1:     0.57470560704264317
 
   printf("randseed:%lld\n", (long long)timer);
   srand(timer);
