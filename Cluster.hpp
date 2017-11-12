@@ -84,6 +84,15 @@ public:
     }
   }
   /* ********************************************************************** */
+  void Selfie() {// Connect all nodes to themselves.
+    size_t siz = this->NodeList.size();
+    NodePtr menode;
+    for (size_t medex=0; medex<siz; medex++) {
+      menode = this->NodeList.at(medex);
+      menode->ConnectIn(menode);
+    }
+  }
+  /* ********************************************************************** */
   void Attach_Genome(MatrixPtr genome0) {
     NodePtr ndp;
     for (size_t ncnt=0; ncnt<this->NodeList.size(); ncnt++) {

@@ -240,6 +240,7 @@ public:
     }else{
       MacroNet = new Cluster();
       MacroNet->Create_Hypercube(HCubeDims);
+      MacroNet->Selfie();
     }
   }
   /* ********************************************************************** */
