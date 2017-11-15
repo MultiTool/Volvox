@@ -19,7 +19,7 @@ public:
   VectPtr state;// These is the pie I put on my windowsill for Node to eat and leave a tip.
   NodePtr USNode, DSNode;
   #if LinkOrg
-  int Num_Matrix_Iterations = 3;
+  int Num_Matrix_Iterations = 5;
   MatrixPtr genome;
   #endif // LinkOrg
   /* ********************************************************************** */

@@ -56,6 +56,19 @@ public:
     }
   }
   /* ********************************************************************** */
+  void Intraconnect_All_No_Selfie() {// Connect cluster to itself all-to-all except no node can connect to itself
+    size_t siz = this->NodeList.size();
+    NodePtr dsn, usn;
+    size_t cnt0, cnt1;
+    for (cnt0=0; cnt0<siz; cnt0++) {
+      dsn = this->NodeList.at(cnt0);
+      for (cnt1=cnt0+1; cnt1<siz; cnt1++) {
+        usn = this->NodeList.at(cnt1);
+        dsn->Connect2Way(usn);
+      }
+    }
+  }
+  /* ********************************************************************** */
   void Self_Connect_Ring() {// Connect all nodes in a ring
     size_t siz = this->NodeList.size();
     size_t nextdex;

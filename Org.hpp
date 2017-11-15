@@ -9,8 +9,8 @@ typedef Org *OrgPtr;
 typedef std::vector<OrgPtr> OrgVec;
 class Org: public Matrix {
 public:
-  static const int NumScores=2;
-  double Score[NumScores];
+  static const int NumScores=3;
+  double Score[NumScores]={};
   bool Doomed = false;
   double ModelStateMag;
   //MatrixPtr matrix;
@@ -38,7 +38,7 @@ public:
   }
   /* ********************************************************************** */
   void Reset() {
-    Doomed = false;
+    Doomed = false; ModelStateMag = 0.0;
     for (int cnt=0;cnt<NumScores;cnt++){
       this->Score[NumScores] = 0;
     }
@@ -62,6 +62,12 @@ public:
       cnt++;
     }
     return 0;
+  }
+  /* ********************************************************************** */
+  void Print_Scores() {
+    for (int cnt=0;cnt<NumScores;cnt++){
+      printf("Sc%i:%1.10f, ", cnt, this->Score[cnt]);
+    }
   }
 };
 

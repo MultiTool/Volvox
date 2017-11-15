@@ -24,6 +24,14 @@ int main() {
   //timer = 1510422187;// paradiddle GenCnt:1637, TopScore0:     0.69716139996346738, TopScore1:     0.57470560704264317
   //timer = 1510497058; // 5 beat, beats hypercube. use for testing other topologies
 
+  //timer = 1510579661;// challenging paradiddle
+  //timer = 1510663529;// also difficult
+  //timer = 1510685430;
+  //timer = 1510756519;
+  //timer = 1510757758;// hard for mxloop
+
+  //timer = 1510768785;// mxloop gets with some work
+
   printf("randseed:%lld\n", (long long)timer);
   srand(timer);
   char name[256];

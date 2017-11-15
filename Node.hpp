@@ -12,14 +12,14 @@ typedef std::vector<NodePtr> NodeVec;
 class Node {
 public:
   LinkVec InLinks, OutLinks;
-  const static int VecTradeSize = 3;
+  const static int VecTradeSize = 3;//3;// This is the size of the signal that all neighboring links pool together.
   VectPtr CrossRoads;// meeting place for all links
   #ifdef LinkOrg
-  const static int CrossRoadsSize = VecTradeSize+3;
+  const static int CrossRoadsSize = VecTradeSize;// if only links have processors, then 100% of CrossRoads is dedicated to just communication entre si.
   #else
   int Num_Matrix_Iterations = 3;
   MatrixPtr genome;
-  const static int CrossRoadsSize = VecTradeSize;
+  const static int CrossRoadsSize = VecTradeSize+3;// If the node is intelligent instead of the link, then it will need some extra numbers for internal processing.
   #endif // LinkOrg
   /* ********************************************************************** */
   Node() {
@@ -93,9 +93,6 @@ public:
       OutVal += this->CrossRoads->ray.at(cnt);
     }
     double result = OutVal/VecTradeSize;// average
-//    if (std::fabs(result)>1.0){
-//      printf("Node::Get_Output error:%f", result);
-//    }
     return ActFun(OutVal);
   }
   /* ********************************************************************** */

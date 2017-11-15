@@ -134,6 +134,7 @@ public:
       if (frand()<MRate) {
         val = this->ray[cnt];
         val += (frand()*2.0-1.0)*amp;// drift mutation, -amp to +amp
+        //val = (frand()*2.0-1.0)*amp;// jump mutation. -amp to +amp
         //val = (frand()*2.0-1.0)*1.0;// jump mutation. amp = 1.0 here, range -1 to +1
         this->ray[cnt] = val;
       }

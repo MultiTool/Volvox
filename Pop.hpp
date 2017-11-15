@@ -27,7 +27,8 @@ public:
   const double SurvivalRate=0.2;//0.02;//0.05;//0.5;
   const double MutRate=0.2;//0.5;//0.3;//0.8//0.6;//0.99;//
   const int MaxOrgGens = 10000;//10000;
-  const int MaxRetries = 2;//16;
+  const int MaxRetries = 4;//2;//16;
+  uintmax_t EvoStagnationLimit = 1500;//16384;//3000;// 5000;//100;//75;//50;
   size_t NumSurvivors;
   double SumScores=0, AvgTopDigi=0.0;
   double AllTimeTopScore=0.0;
@@ -45,16 +46,8 @@ public:
   }
   /* ********************************************************************** */
   void Init(int popsize) {// is it really necessary to be able to re-init without just deleting the population?
-    Org *org;
-    int pcnt;
-    this->popsz = popsize;
-    forest.resize(popsize);
-    ScoreDexv.resize(popsize);
-    for (pcnt=0; pcnt<popsize; pcnt++) {
-      org = Org::Abiogenate();
-      ScoreDexv.at(pcnt) = org;
-    }
-    switch (1){
+
+    switch (2){
     case 0:
       tester=new TesterMx(Org::DefaultWdt, Org::DefaultHgt);
       break;
@@ -70,9 +63,17 @@ public:
     default:break;
     }
 
-    this->GenCnt=0;
+    Org *org;
+    int pcnt;
+    this->popsz = popsize;
+    forest.resize(popsize);
+    ScoreDexv.resize(popsize);
+    for (pcnt=0; pcnt<popsize; pcnt++) {
+      org = Org::Abiogenate();
+      ScoreDexv.at(pcnt) = org;
+    }
     NumSurvivors = popsize * SurvivalRate;
-    SumScores=0;
+    this->Init_Evolution();
   }
   /*
 We want this instead:
@@ -89,11 +90,12 @@ mutate children
   */
   /* ********************************************************************** */
   void Evolve() {// evolve for generations
-    uintmax_t EvoStagnationLimit = 1500;//5000;//100;//75;//50;
     for (int RetryCnt=0;RetryCnt<MaxRetries;RetryCnt++){
+      this->Init_Evolution();
       double CurrentTopScoreLocal;
       AllTimeTopScore = 0.0;
       int AbortCnt=0;
+      printf("\nRetryCnt:%i\n", RetryCnt);
       for (int gcnt=0;gcnt<MaxOrgGens;gcnt++){
         this->Gen();
         CurrentTopScoreLocal=this->GetTopScore();
@@ -112,14 +114,9 @@ mutate children
         }
         this->Print_Results();
       }
-      printf("RetryCnt:%i\n\n", RetryCnt);
       OrgPtr TopOrg = this->GetTopOrg();
-      if (wobble!=nullptr){
-        wobble->Print_Org(TopOrg);
-      }
+      tester->Print_Org(TopOrg);
       //std::cin.getline(name,256);
-
-      this->Restart();
     }
   }
   /* ********************************************************************** */
@@ -162,7 +159,11 @@ mutate children
       //printf("GenCnt:%4d, CurrentTopScore:%f, AvgTopDigi:%f, TopDigiScore::%f\n", this->GenCnt, CurrentTopScore, AvgTopDigi, TopDigiScore);
       //printf("GenCnt:%4d, CurrentTopScore:%f, TopDigiScore:%f\n", this->GenCnt, CurrentTopScore, TopDigiScore);
       //printf("GenCnt:%4d, TopScore:%24.17g, TopDigiScore:%f, ModelStateMag:%f\n", this->GenCnt, CurrentTopScore, TopDigiScore, ModelStateMag);
-      printf("GenCnt:%4d, TopScore0:%24.17g, TopScore1:%24.17g\n", this->GenCnt, CurrentTopScore, TopDigiScore);
+      //printf("GenCnt:%4d, TopScore0:%24.17g, TopScore1:%24.17g\n", this->GenCnt, CurrentTopScore, TopDigiScore);// full resolution of double
+      //printf("GenCnt:%4d, TopScore0:%1.20g, TopScore1:%1.20g\n", this->GenCnt, CurrentTopScore, TopDigiScore);
+      printf("GenCnt:%4d, ", this->GenCnt);
+      TopOrg->Print_Scores();
+      printf("\n");
     }
   }
   /* ********************************************************************** */
@@ -181,7 +182,8 @@ mutate children
     double TopDigiScore = TopOrg->Score[1];
     AvgTopDigi=(AvgTopDigi*0.9) + (TopDigiScore*0.1);
     //printf("GenCnt:%i, TopScore:%f, AvgTopDigi:%f, TopDigiScore:%f\n", this->GenCnt, TopScore, AvgTopDigi, TopDigiScore);
-    printf("GenCnt:%4d, TopScore0:%24.17g, TopScore%24.17g\n", this->GenCnt, TopScore, TopDigiScore);
+    //printf("GenCnt:%4d, TopScore0:%24.17g, TopScore1:%24.17g\n", this->GenCnt, TopScore, TopDigiScore);// full resolution of double
+    printf("GenCnt:%4d, TopScore0:%1.20g, TopScore1:%1.20g\n", this->GenCnt, CurrentTopScore, TopDigiScore);
   }
   /* ********************************************************************** */
   OrgPtr GetTopOrg() {
@@ -198,14 +200,15 @@ mutate children
     return TopScore;
   }
   /* ********************************************************************** */
-  void Restart() {// re-initialize the population genome without changing the tester or the test
+  void Init_Evolution() {// re-initialize the population genome without changing the tester or the test
     Org *org;
+    this->GenCnt=0; SumScores=0.0; AvgTopDigi=0.0;
+    AllTimeTopScore=0.0; CurrentTopScore=0.0;
     size_t pcnt, popsize = ScoreDexv.size();
     for (pcnt=0; pcnt<popsize; pcnt++) {
       org = ScoreDexv.at(pcnt);
       org->Rand_Init();
     }
-    this->GenCnt=0; SumScores=0.0; AvgTopDigi=0.0;
   }
   /* ********************************************************************** */
   void Clear() {// is it really necessary to be able to clear without just deleting the population?
@@ -234,7 +237,7 @@ mutate children
     return b1->Compare_Score(b0) > 0;
   }
   void Sort() {
-    std::random_shuffle(ScoreDexv.begin(), ScoreDexv.end());
+    std::random_shuffle(ScoreDexv.begin(), ScoreDexv.end());//
     std::sort(ScoreDexv.begin(), ScoreDexv.end(), DescendingScore);
   }
   /* ********************************************************************** */
