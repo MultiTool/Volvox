@@ -159,7 +159,7 @@ public:
     double val=0.0;
     for (int cnt=0; cnt<ln; cnt++) {
       val = this->ray[cnt];
-      printf("%f, ",val);
+      printf("% 1.4f, ",val);
     }
     printf("\n");
   }

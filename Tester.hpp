@@ -514,11 +514,25 @@ public:
       Bins[BinDex]++;
     }
     Percent_Negative/=(double)TestRuns;
+    double OneSide;
     double score = 1.0;
     for (int bcnt=0;bcnt<Num_Bins;bcnt++){
-       score *= 1.0+(((double)Bins[bcnt])/(double)TestRuns);
+       if (true){
+         score *= (0.001/(double)Num_Bins) + ((((double)Bins[bcnt])/(double)TestRuns)*0.999);
+       }else{
+         OneSide = (((double)Bins[bcnt])/(double)TestRuns);
+         score += OneSide*OneSide;// sum of squares for alternate pythagorean approach
+       }
     }
-    candidate->Score[0]=score;
+    // score = std::sqrt(score); // pythagorean.  so subtract this score from max hypotenuse?  max hypot is sqrt(Num_Bins) if max for 1 bin is 1.0.
+    // ((1/16) ^ 16) ^ (1/16) *16 = 1
+    // 1/Num_Bins to the power of Num_Bins
+    double PerfectScore = std::pow(1.0/(double)Num_Bins, (double)Num_Bins);// 1/16 to the 16th is in fact a perfect score
+    //double ScoreRoot = std::pow(score, (double)PerfectScore);
+    //double PerfectScore = TestRuns;// this is dubious.  need real math, not voodoo.
+    //double ScoreRoot = std::pow(score, 1.0/(double)PerfectScore);
+    double ScoreRoot = std::pow(score, 1.0/(double)Num_Bins) * ((double)Num_Bins);
+    candidate->Score[0]=ScoreRoot;
     candidate->Score[1]=(1.0-Percent_Negative)*Percent_Negative;// favor equal ratio of positive to negative
   }
   /* ********************************************************************** */

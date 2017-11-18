@@ -147,7 +147,7 @@ public:
     Push_Fire();
     // right here the fire vals reside in the links
     Collect_And_Fire();
-    double fred=12;
+    //double fred=12;
     //this->Aaagh<double>(fred);
     //this->Aaagh<void>(void);
   }

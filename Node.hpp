@@ -13,13 +13,15 @@ class Node {
 public:
   LinkVec InLinks, OutLinks;
   const static int VecTradeSize = 3;//3;// This is the size of the signal that all neighboring links pool together.
+  const static int ExternalCommSize = VecTradeSize;// size of the signal that is read/written by things external to this whole network. must be less than or equal to VecTradeSize.
   VectPtr CrossRoads;// meeting place for all links
   #ifdef LinkOrg
   const static int CrossRoadsSize = VecTradeSize;// if only links have processors, then 100% of CrossRoads is dedicated to just communication entre si.
   #else
   int Num_Matrix_Iterations = 3;
   MatrixPtr genome;
-  const static int CrossRoadsSize = VecTradeSize+3;// If the node is intelligent instead of the link, then it will need some extra numbers for internal processing.
+  const static int CrossRoadsSize = Org::DefaultWdt;// If the node is intelligent instead of the link, then it will need some extra numbers for internal processing.
+  const static int NodeRecurrenceSize = CrossRoadsSize-VecTradeSize;// not used yet.
   #endif // LinkOrg
   /* ********************************************************************** */
   Node() {
@@ -80,19 +82,15 @@ public:
   }
   /* ********************************************************************** */
   void Load_Input(double FireVal) {
-    #ifdef LinkOrg
-    this->CrossRoads->Fill(FireVal);
-    #else
-    this->CrossRoads->Fill(FireVal, VecTradeSize);
-    #endif // LinkOrg
+    this->CrossRoads->Fill(FireVal, ExternalCommSize);// only use a subset of crossroads vector for external communication, and the rest for internal comm or recurrence.
   }
   /* ********************************************************************** */
   double Get_Output() {
     double OutVal=0;
-    for (int cnt=0;cnt<VecTradeSize;cnt++){
+    for (int cnt=0;cnt<ExternalCommSize;cnt++){
       OutVal += this->CrossRoads->ray.at(cnt);
     }
-    double result = OutVal/VecTradeSize;// average
+    double result = OutVal/ExternalCommSize;// average
     return ActFun(OutVal);
   }
   /* ********************************************************************** */
@@ -100,7 +98,7 @@ public:
     LinkPtr ups;
     size_t siz;
     Run_Orgs();// get all my inlinks to compute their output vectors
-    this->CrossRoads->Fill(0.0);// clear
+    this->CrossRoads->Fill(0.0, VecTradeSize);// clear all shared channels, but not recurrent ones, if any
     siz = this->InLinks.size();
     for (size_t cnt=0; cnt<siz; cnt++) {
       ups = this->InLinks.at(cnt);// read link output vector here, and add it to my own
@@ -115,7 +113,6 @@ public:
     for (size_t cnt=0; cnt<siz; cnt++) {
       downs = this->OutLinks.at(cnt);// after summing/processing the node vector, push it out to the input vectors of all links
       downs->state->Copy_From(this->CrossRoads, VecTradeSize);
-      //downs->Run_Org();// could alternatively force outlinks to run, and update their own output vectors
     }
   }
   /* ********************************************************************** */
