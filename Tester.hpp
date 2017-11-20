@@ -163,7 +163,7 @@ public:
   /* ********************************************************************** */
   void Test(OrgPtr candidate) override {
     Vect ModelState(Total_Node_Number);
-    Vect OrgState(Total_Node_Number);
+    Vect OrgState(candidate->wdt);
     ModelState.Copy_From(ModelStateSeed);
     double onescore, score, digiscore, sumdigiscore, DigiProduct, MultiDigiProduct;
     int OneBitDex = External_Node_Number-1;
@@ -209,7 +209,8 @@ public:
     double DigiScoreRoot = std::pow(MultiDigiProduct, 1.0/(double)PerfectDigi);
     if (false){
       candidate->Score[0]=ScoreRoot;// analog score is primary
-      candidate->Score[1]=sumdigiscore/PerfectDigi;
+      candidate->Score[1]=DigiScoreRoot;// digital score
+      candidate->Score[2]=sumdigiscore/PerfectDigi;
     }else{
       candidate->Score[0]=DigiScoreRoot;// digital score is primary
       candidate->Score[1]=ScoreRoot;

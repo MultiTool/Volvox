@@ -78,6 +78,7 @@ if override tester creator, we create and delete tester internally.
       tester=new TesterNet();
       break;
     case 2:
+      //tester=new TesterMxLoop(Org::DefaultWdt-2, Org::DefaultHgt-2);
       tester=new TesterMxLoop(Org::DefaultWdt, Org::DefaultHgt);
       break;
     case 3:
@@ -131,7 +132,7 @@ mutate children
           AbortCnt=0; AllTimeTopScore=CurrentTopScoreLocal;
         }else{
           AbortCnt++; // stopping condition: if best score hasn't improved in EvoStagnationLimit generations, bail.
-          if (AbortCnt>EvoStagnationLimit){ break; }
+          if (AbortCnt>EvoStagnationLimit){ printf("Stagnated.\n"); break; }
         }
       }
       this->Print_Results();
