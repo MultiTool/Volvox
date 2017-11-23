@@ -19,7 +19,7 @@ public:
   uint32_t popsz;
   OrgVec Forest; // for sorting
 
-  TesterPtr tester;// crucible
+  TesterPtr tester=nullptr, tester_internal=nullptr;// crucible
   TesterMxWobblePtr wobble = nullptr;
   uint32_t GenCnt;
   const double SurvivalRate=0.2;//0.02;//0.05;//0.5;
@@ -69,24 +69,23 @@ if override tester creator, we create and delete tester internally.
   */
   /* ********************************************************************** */
   void Init(int popsize) {// is it really necessary to be able to re-init without just deleting the population?
-
     switch (3){
     case 0:
-      tester=new TesterMx(Org::DefaultWdt, Org::DefaultHgt);
+      tester_internal=new TesterMx(Org::DefaultWdt, Org::DefaultHgt);
       break;
     case 1:
-      tester=new TesterNet();
+      tester_internal=new TesterNet();
       break;
     case 2:
-      //tester=new TesterMxLoop(Org::DefaultWdt-2, Org::DefaultHgt-2);
-      tester=new TesterMxLoop(Org::DefaultWdt, Org::DefaultHgt);
+      //tester_internal=new TesterMxLoop(Org::DefaultWdt-2, Org::DefaultHgt-2);
+      tester_internal=new TesterMxLoop(Org::DefaultWdt, Org::DefaultHgt);
       break;
     case 3:
-      tester = wobble = new TesterMxWobble(Org::DefaultWdt, Org::DefaultHgt);
+      tester_internal = wobble = new TesterMxWobble(Org::DefaultWdt, Org::DefaultHgt);
       break;
     default:break;
     }
-
+    this->tester = this->tester_internal;
     this->InitPop(popsize);
   }
   /* ********************************************************************** */
@@ -100,6 +99,18 @@ if override tester creator, we create and delete tester internally.
       Forest.at(pcnt) = org;
     }
     NumSurvivors = popsize * SurvivalRate;
+  }
+  /* ********************************************************************** */
+  OrgPtr Evo_Model() {// to do: move to outside of pop class
+    OrgPtr org;
+    TesterMxWobblePtr wobbletester = new TesterMxWobble(Org::DefaultWdt, Org::DefaultHgt);
+    PopPtr pop = new Pop();
+    pop->Assign_Params(100, wobbletester, /* MaxOrgGens */ 50, 1, 50);
+    pop->Evolve();
+    org = pop->CloneTopOrg();
+    delete pop;
+    delete wobbletester;
+    return org;
   }
   /*
 We want this instead:
@@ -246,7 +257,11 @@ mutate children
     for (pcnt=0; pcnt<siz; pcnt++) {
       delete Forest.at(pcnt);
     }
-    delete tester;
+    this->tester=nullptr;// is this a good idea?
+    if (this->tester_internal!=nullptr){
+      delete this->tester_internal; // if tester was created internally, delete it internally
+      this->tester_internal = nullptr;
+    }
   }
   /* ********************************************************************** */
   double AvgBeast() {

@@ -14,7 +14,6 @@ typedef Vect *VectPtr;
 class Vect {
 public:
   int len;
-  //double* ray;// to do: change array to std vector
   std::vector<double> ray;
   //std::array<int, 3> a1{ {1, 2, 3} }; // double-braces required in C++11 (not in C++14)
   /* ********************************************************************** */
@@ -22,7 +21,6 @@ public:
     this->len = wdt0;
     ray.resize(wdt0, 0.01); //ray.reserve(wdt0);
     //double *array = &(*testvec.begin());
-
     //for (int cnt=0; cnt<this->len; cnt++) { this->ray[cnt]=0.01; }
   }
   /* ********************************************************************** */
@@ -37,6 +35,18 @@ public:
   void Copy_From(VectPtr source, int Limit) {
     int ln = std::min(std::min(this->len, source->len), Limit);
     std::copy_n(source->ray.begin(), ln, this->ray.begin());
+  }
+  /* ********************************************************************** */
+  VectPtr Clone_Me() {
+    VectPtr child = new Vect(this->len);
+    std::copy_n(this->ray.begin(), this->len, child->ray.begin());
+    return child;
+  }
+  /* ********************************************************************** */
+  void Define_From(VectPtr source) {// http://www.cplusplus.com/reference/vector/vector/operator=/
+    this->len = source->len;// not tested or working yet
+    this->ray = source->ray;
+    //ray.resize(this->len, 0.01);
   }
   /* ********************************************************************** */
   void Add_To_Me(VectPtr other, int Limit) {
