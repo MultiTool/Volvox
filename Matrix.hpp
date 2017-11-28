@@ -43,10 +43,11 @@ public:
     return child;
   }
   /* ********************************************************************** */
-  void Define_From(VectPtr source) {// http://www.cplusplus.com/reference/vector/vector/operator=/
+  void Define_From(VectPtr source) {// resize to source size as well as copy all contents
     this->len = source->len;// not tested or working yet
-    this->ray = source->ray;
-    //ray.resize(this->len, 0.01);
+    this->ray.resize(source->len);
+    std::copy_n(source->ray.begin(), source->len, this->ray.begin());
+    //this->ray = source->ray;// does this really copy the vector or just the pointer to the vector?  http://www.cplusplus.com/reference/vector/vector/operator=/
   }
   /* ********************************************************************** */
   void Add_To_Me(VectPtr other, int Limit) {

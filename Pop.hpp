@@ -19,7 +19,7 @@ public:
   uint32_t popsz;
   OrgVec Forest; // for sorting
 
-  TesterPtr tester=nullptr, tester_internal=nullptr;// crucible
+  TesterPtr tester=nullptr;//, tester_internal=nullptr;// crucible
   TesterMxWobblePtr wobble = nullptr;
   uint32_t GenCnt;
   const double SurvivalRate=0.2;//0.02;//0.05;//0.5;
@@ -36,7 +36,7 @@ public:
   }
   /* ********************************************************************** */
   Pop(int popsize) {
-    this->Init(popsize);
+    this->InitPop(popsize);
   }
   /* ********************************************************************** */
   ~Pop() {
@@ -45,48 +45,15 @@ public:
   /* ********************************************************************** */
   void Assign_Params(int popsize0, TesterPtr tester0, int MaxOrgGens0, int MaxRetries0, uintmax_t EvoStagnationLimit0) {
     this->Clear();// note: clear deletes the previous tester, so this is bad.  decide if tester is created and owned externally, or maybe just an enum parameter.
-    this->tester = tester0;
+    this->Attach_Tester(tester0);
     this->MaxOrgGens = MaxOrgGens0;
     this->MaxRetries = MaxRetries0;
     this->EvoStagnationLimit = EvoStagnationLimit0;
     this->InitPop(popsize0);
   }
-  /*
-goal is to breed models for interestingness,
-then feed the winner(s) to the tester, and feed the tester to the population
-then the pop will evolve against interesting models.
-
-so main pop has a subpop to breed models, and the best model is cloned and passed to the any tester that can use an mx model.
-requires: intermediate subclass of tester that takes mx models.
-
-or, code that holds both pops, the model breeder and the network breeder.
-in that case the network breeder will take the winner model as a param, then pass it to its tester as a param.
-more complicated than first option.
-
-but either way, a pop must either take an arbitrary tester as a parameter, or maybe inherit from main pop and override tester creating part.
-if override tester creator, we create and delete tester internally.
-
-  */
   /* ********************************************************************** */
-  void Init(int popsize) {// is it really necessary to be able to re-init without just deleting the population?
-    switch (3){
-    case 0:
-      tester_internal=new TesterMx(Org::DefaultWdt, Org::DefaultHgt);
-      break;
-    case 1:
-      tester_internal=new TesterNet();
-      break;
-    case 2:
-      //tester_internal=new TesterMxLoop(Org::DefaultWdt-2, Org::DefaultHgt-2);
-      tester_internal=new TesterMxLoop(Org::DefaultWdt, Org::DefaultHgt);
-      break;
-    case 3:
-      tester_internal = wobble = new TesterMxWobble(Org::DefaultWdt, Org::DefaultHgt);
-      break;
-    default:break;
-    }
-    this->tester = this->tester_internal;
-    this->InitPop(popsize);
+  void Attach_Tester(TesterPtr tester0) {// got rid of all internal creation and deletion of testers.  Any tester should be passed to pop as a parameter.
+    this->tester = tester0;
   }
   /* ********************************************************************** */
   void InitPop(int popsize) {// Create and seed the population of creatures.
@@ -258,10 +225,6 @@ mutate children
       delete Forest.at(pcnt);
     }
     this->tester=nullptr;// is this a good idea?
-    if (this->tester_internal!=nullptr){
-      delete this->tester_internal; // if tester was created internally, delete it internally
-      this->tester_internal = nullptr;
-    }
   }
   /* ********************************************************************** */
   double AvgBeast() {

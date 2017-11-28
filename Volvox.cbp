@@ -40,6 +40,9 @@
 		</Compiler>
 		<Unit filename="Base.hpp" />
 		<Unit filename="Cluster.hpp" />
+		<Unit filename="Lab.hpp">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
 		<Unit filename="Link.hpp" />
 		<Unit filename="Matrix.hpp">
 			<Option target="&lt;{~None~}&gt;" />

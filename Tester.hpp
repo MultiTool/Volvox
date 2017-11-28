@@ -254,6 +254,8 @@ public:
     ModelState.Print_Me();
     double Range = ModelState.MaxLen();
     int BinDex;
+    printf("MxLoop StartingState:\n");
+    ModelState.Print_Me();
     printf("RunningStart:\n");
     for (int vcnt=0;vcnt<RunningStart;vcnt++){
       CurrentModel->Iterate(&ModelState, ModelIterations, &ModelState);
@@ -276,7 +278,7 @@ public:
   }
   /* ********************************************************************** */
   void Attach_StartingState(VectPtr StartingState0) override {
-    this->StartingState->Copy_From(StartingState0);
+    this->StartingState->Define_From(StartingState0);
   }
   /* ********************************************************************** */
   void Attach_Model(MatrixPtr model0) override {
@@ -284,7 +286,6 @@ public:
     this->model = model0;
     this->MxWdt=this->model->wdt; this->MxHgt=this->model->hgt;
     External_Node_Number=this->MxWdt/2; Total_Node_Number=this->MxWdt;
-    Profile_Model(this->model);
   }
 };
 
@@ -366,6 +367,7 @@ public:
     int Bins[Num_Bins] = {};
     Vect ModelState(this->MxWdt);
     ModelState.Copy_From(StartingState);
+    printf("MxWobble StartingState:\n");
     ModelState.Print_Me();
     double Range = ModelState.MaxLen();
     double Mag;
@@ -413,11 +415,11 @@ public:
   std::vector<MatrixPtr> ModelVec;// behavior to imitate
   int ModelIterations=1, NetworkIterations=5;
   const static int Num_Invecs = 20;
-  VectPtr ModelStateSeed;//Total_Node_Number);
+  VectPtr StartingState;//Total_Node_Number);
   /* ********************************************************************** */
   TesterNet(){
     printf("PerfectDigi:%f, HCubeDims:%i\n", PerfectDigi, HCubeDims);
-    ModelStateSeed = new Vect(Total_Node_Number);
+    StartingState = new Vect(Total_Node_Number);
     this->Scramble_ModelStateSeed();
     Init_Models();
     Print_Models();
@@ -440,7 +442,7 @@ public:
   }
   /* ********************************************************************** */
   ~TesterNet(){
-    delete ModelStateSeed;
+    delete StartingState;
     Delete_Models();
     delete MacroNet;
   }
@@ -462,7 +464,7 @@ public:
     sumdigiscore=0; MultiDigiProduct=1.0;
     ModelStateMag=1.0;
     for (int mcnt=0;mcnt<Num_Models;mcnt++){
-      ModelState.Copy_From(ModelStateSeed);
+      ModelState.Copy_From(StartingState);
       this->MacroNet->Clear_State();
       CurrentModel = this->ModelVec.at(mcnt);
       for (int vcnt=0;vcnt<RunningStart;vcnt++){// Learning/adapting loop
@@ -526,7 +528,7 @@ model subset output then overwrites bpnet output, becomes input
     int Num_Bins = 16;
     int Bins[Num_Bins] = {};
     Vect ModelState(Total_Node_Number);
-    ModelState.Copy_From(ModelStateSeed);
+    ModelState.Copy_From(StartingState);
     ModelState.Print_Me();
     double Range = ModelState.MaxLen();
     int BinDex;
@@ -553,6 +555,7 @@ model subset output then overwrites bpnet output, becomes input
   }
   /* ********************************************************************** */
   void Attach_StartingState(VectPtr StartingState0) override {
+    this->StartingState->Define_From(StartingState0);
   }
   /* ********************************************************************** */
   void Attach_Model(MatrixPtr CurrentModel) override {
@@ -602,8 +605,8 @@ model subset output then overwrites bpnet output, becomes input
   void Scramble_ModelStateSeed() {
     double Mag=0.0;
     do {
-      ModelStateSeed->Rand_Init();// mutate 100%
-      Mag = ModelStateSeed->Magnitude();
+      StartingState->Rand_Init();// mutate 100%
+      Mag = StartingState->Magnitude();
       printf("Seed Mag:%f\n", Mag);
     } while (Mag<1.0);
   }

@@ -3,7 +3,7 @@
 
 #include "Org.hpp"
 
-#define LinkOrg 1
+#define LinkOrg 1 // toggles whether network organisms operate within the nodes or within the links
 
 #define WeightAmp 2.0;
 
