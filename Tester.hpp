@@ -285,7 +285,7 @@ public:
     this->Clear_Model();
     this->model = model0;
     this->MxWdt=this->model->wdt; this->MxHgt=this->model->hgt;
-    External_Node_Number=this->MxWdt/2; Total_Node_Number=this->MxWdt;
+    Total_Node_Number=this->MxWdt; External_Node_Number=Total_Node_Number/2;
   }
 };
 
@@ -394,6 +394,10 @@ public:
     }
     printf("\n");
     printf("Score0:%24.17g, Score1:%24.17g\n", candidate->Score[0], candidate->Score[1]);
+  }
+  /* ********************************************************************** */
+  void Attach_StartingState(VectPtr StartingState0) override {
+    this->StartingState->Define_From(StartingState0);
   }
 };
 

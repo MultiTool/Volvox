@@ -41,7 +41,7 @@ int main() {
   printf("randseed:%lld\n", (long long)timer);
   srand(timer);
   char name[256];
-  {
+  if (true) {
     LabPtr lab = new Lab();
     lab->Run_Test();
     delete lab;

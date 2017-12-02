@@ -17,6 +17,11 @@ public:
   std::vector<double> ray;
   //std::array<int, 3> a1{ {1, 2, 3} }; // double-braces required in C++11 (not in C++14)
   /* ********************************************************************** */
+  Vect() {
+    this->len = 00;
+    ray.resize(0); //ray.reserve(0);
+  }
+  /* ********************************************************************** */
   Vect(int wdt0) {
     this->len = wdt0;
     ray.resize(wdt0, 0.01); //ray.reserve(wdt0);
@@ -25,6 +30,11 @@ public:
   }
   /* ********************************************************************** */
   ~Vect() {
+  }
+  /* ********************************************************************** */
+  void Resize(size_t siz) {// resize
+    this->len = siz;
+    this->ray.resize(siz, 0.0);
   }
   /* ********************************************************************** */
   void Copy_From(VectPtr source) {
@@ -37,17 +47,17 @@ public:
     std::copy_n(source->ray.begin(), ln, this->ray.begin());
   }
   /* ********************************************************************** */
-  VectPtr Clone_Me() {
-    VectPtr child = new Vect(this->len);
-    std::copy_n(this->ray.begin(), this->len, child->ray.begin());
-    return child;
-  }
-  /* ********************************************************************** */
   void Define_From(VectPtr source) {// resize to source size as well as copy all contents
     this->len = source->len;// not tested or working yet
     this->ray.resize(source->len);
     std::copy_n(source->ray.begin(), source->len, this->ray.begin());
     //this->ray = source->ray;// does this really copy the vector or just the pointer to the vector?  http://www.cplusplus.com/reference/vector/vector/operator=/
+  }
+  /* ********************************************************************** */
+  VectPtr Clone_Me() {
+    VectPtr child = new Vect(this->len);
+    std::copy_n(this->ray.begin(), this->len, child->ray.begin());
+    return child;
   }
   /* ********************************************************************** */
   void Add_To_Me(VectPtr other, int Limit) {

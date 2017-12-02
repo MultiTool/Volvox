@@ -11,73 +11,78 @@
 //#define popmax 5
 //#define popmax 2
 
+/*
+to do: define creature matrix size from inside pop.
+so each pop can have a custom monster size.
+*/
+
+/* ********************************************************************** */
+class Stat {
+public:
+  double Min, Max, Avg;
+  double StandardDev;// ??
+};
+/* ********************************************************************** */
+class PopStats { // for hundreds of trials
+public:
+  Stat Score;// min max avg score for N trials with all the same parameters, but maybe a variety of models.
+  Stat FinalGen;// generation number where we won or lost
+  void Print_Me(){}
+};
+
 /* ********************************************************************** */
 class Pop;// forward
 typedef Pop *PopPtr;
 class Pop {
 public:
-  uint32_t popsz;
+  uint32_t popsz = -1;
   OrgVec Forest; // for sorting
 
   TesterPtr tester=nullptr;//, tester_internal=nullptr;// crucible
-  TesterMxWobblePtr wobble = nullptr;
+  //TesterMxWobblePtr wobble = nullptr;
   uint32_t GenCnt;
   const double SurvivalRate=0.2;//0.02;//0.05;//0.5;
   const double MutRate=0.2;//0.5;//0.3;//0.8//0.6;//0.99;//
   int MaxOrgGens = 10000;//10000;//1000000;//50;//
   int MaxRetries = 1;//4;//2;//16;
+  size_t OrgSize = -1;//Org::DefaultWdt;// snox here there be problems - org matrix size needs to be determined flexibly by pop.
   uintmax_t EvoStagnationLimit = 1500;//16384;//3000;// 5000;//100;//75;//50;
   size_t NumSurvivors;
   double SumScores=0, AvgTopDigi=0.0;
   double AllTimeTopScore=0.0;
   double CurrentTopScore=0.0;
   /* ********************************************************************** */
-  Pop() : Pop(popmax) {
-  }
-  /* ********************************************************************** */
-  Pop(int popsize) {
-    this->InitPop(popsize);
+  Pop() {
   }
   /* ********************************************************************** */
   ~Pop() {
     this->Clear();
   }
   /* ********************************************************************** */
-  void Assign_Params(int popsize0, TesterPtr tester0, int MaxOrgGens0, int MaxRetries0, uintmax_t EvoStagnationLimit0) {
-    this->Clear();// note: clear deletes the previous tester, so this is bad.  decide if tester is created and owned externally, or maybe just an enum parameter.
+  void Assign_Params(int popsize0, int OrgSize0, TesterPtr tester0, int MaxOrgGens0, int MaxRetries0, uintmax_t EvoStagnationLimit0) {
+    this->Clear();// delete previous population, if any.
     this->Attach_Tester(tester0);
     this->MaxOrgGens = MaxOrgGens0;
     this->MaxRetries = MaxRetries0;
     this->EvoStagnationLimit = EvoStagnationLimit0;
-    this->InitPop(popsize0);
+    this->InitPop(popsize0, OrgSize0);
   }
   /* ********************************************************************** */
   void Attach_Tester(TesterPtr tester0) {// got rid of all internal creation and deletion of testers.  Any tester should be passed to pop as a parameter.
     this->tester = tester0;
   }
   /* ********************************************************************** */
-  void InitPop(int popsize) {// Create and seed the population of creatures.
+  void InitPop(int popsize, int orgsize) {// Create and seed the population of creatures.
     Org *org;
     int pcnt;
     this->popsz = popsize;
+    this->OrgSize = orgsize;
     Forest.resize(popsize);
     for (pcnt=0; pcnt<popsize; pcnt++) {
-      org = Org::Abiogenate();
+      org = Org::Abiogenate(OrgSize, OrgSize);
       Forest.at(pcnt) = org;
     }
     NumSurvivors = popsize * SurvivalRate;
-  }
-  /* ********************************************************************** */
-  OrgPtr Evo_Model() {// to do: move to outside of pop class
-    OrgPtr org;
-    TesterMxWobblePtr wobbletester = new TesterMxWobble(Org::DefaultWdt, Org::DefaultHgt);
-    PopPtr pop = new Pop();
-    pop->Assign_Params(100, wobbletester, /* MaxOrgGens */ 50, 1, 50);
-    pop->Evolve();
-    org = pop->CloneTopOrg();
-    delete pop;
-    delete wobbletester;
-    return org;
   }
   /*
 We want this instead:

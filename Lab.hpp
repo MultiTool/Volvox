@@ -30,12 +30,12 @@ public:
   }
   /* ********************************************************************** */
   void Evo_Model(MatrixPtr &model, VectPtr &StartingState) {// to do: move to outside of pop class
-    printf("Evo_Model\n");
-    //MatrixPtr org;// = new Matrix();
+    int ModelSize = Org::DefaultWdt;
+    printf("Evo_Model, ModelSize:%i\n", ModelSize);
     TesterMxWobblePtr wobbletester = new TesterMxWobble(Org::DefaultWdt, Org::DefaultHgt);
     //VectPtr StartingState;
     PopPtr pop = new Pop();
-    pop->Assign_Params(100, wobbletester, /* MaxOrgGens */ 1000, 1, /* EvoStagnationLimit */ 150);
+    pop->Assign_Params(100, ModelSize, wobbletester, /* MaxOrgGens */ 1000, 1, /* EvoStagnationLimit */ 150);
     pop->Evolve();
     StartingState = wobbletester->StartingState->Clone_Me();
     model = pop->CloneTopOrg();//org->Copy_From(pop->GetTopOrg());
@@ -44,7 +44,10 @@ public:
   }
   /* ********************************************************************** */
   void Evo_Mx(MatrixPtr model, VectPtr StartingState) {
-    printf("Evo_Mx\n");
+    int OrgSize = model->wdt;
+    //OrgSize += 2;
+    //OrgSize *= 2;
+    printf("Evo_Mx, OrgSize:%i\n", OrgSize);
     //printf("Model Sanity0:\n"); model->Print_Me();
     TesterMxLoopPtr tester=new TesterMxLoop(Org::DefaultWdt, Org::DefaultHgt);
     tester->Attach_StartingState(StartingState);
@@ -52,7 +55,8 @@ public:
     printf("MxLoop StartingState:\n"); tester->StartingState->Print_Me();
     //printf("MxLoop Model Sanity1:\n"); tester->model->Print_Me();
     PopPtr pop = new Pop();
-    pop->Assign_Params(100, tester, /* MaxOrgGens */ 10000, 2, /* EvoStagnationLimit */ 1500);
+    int EvoStagnationLimit = 1500;//200;//
+    pop->Assign_Params(100, OrgSize, tester, /* MaxOrgGens */ 10000, 2, /* EvoStagnationLimit */ EvoStagnationLimit);
     //printf("Model Sanity2:\n"); ((TesterMxLoopPtr)(pop->tester))->model->Print_Me();
     pop->Evolve();
     delete pop;
@@ -61,7 +65,7 @@ public:
   /* ********************************************************************** */
   TesterPtr Init_Tester() {
     TesterPtr tester = nullptr;
-    switch (2){
+    switch (1){
     case 0:
       tester=new TesterMx(Org::DefaultWdt, Org::DefaultHgt);
       break;
@@ -79,9 +83,39 @@ public:
     }
     return tester;
   }
+  /* ********************************************************************** */
+  void Big_Survey(MatrixPtr model, VectPtr StartingState) {
+/*
+Next:
+create a 'package' of instances executed with the same parameters to statistically score those parameters.  How many instances?  50? 100?
+
+margin of error = 1/sqrt(popsize)
+
+1/(400^0.5) = 0.5, so if score is 90%, we would be 95% certain the results are between 85% and 95%.
+
+generate models;
+tester = new TesterMxLoop();
+pop.Attach(tester);
+for OrgSize (8 and 16) {
+  StatObj = new Stats();
+  pop.SetOrgSize(orgsize);
+  for all Models {
+    tester.Attach(model);
+    for each sample {// do this about 400 times. each time is a new evolution with all the same parameters
+      pop.Reset();
+      pop.Evolve();// here is all the same tester, model, and parameters.
+      pop.Get_Stats(&StatObj);
+    }
+  }
+  StatObj.Print_Me();
+}// orgsize
+
+*/
+  }
 };
 
 #endif // LAB_HPP_INCLUDED
+
 
 /*
 Experiments to do:

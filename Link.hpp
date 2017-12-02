@@ -15,8 +15,8 @@ typedef Link *LinkPtr;
 typedef std::vector<LinkPtr> LinkVec;
 class Link {
 public:
-  int numins=Org::DefaultWdt;//, Org::DefaultHgt
-  VectPtr state;// These is the pie I put on my windowsill for Node to eat and leave a tip.
+  int numins=0;
+  Vect state;// These is the pie I put on my windowsill for Node to eat and leave a tip.
   NodePtr USNode, DSNode;
   #if LinkOrg
   int Num_Matrix_Iterations = 5;
@@ -24,30 +24,31 @@ public:
   #endif // LinkOrg
   /* ********************************************************************** */
   Link() {
-    state = new Vect(this->numins);
+    state.Resize(this->numins);
     Clear_State();
   }
   /* ********************************************************************** */
-  ~Link() {
-    delete state;
+  ~Link() {//delete state;
   }
   /* ********************************************************************** */
   void Attach_Genome(MatrixPtr genome0) {
     this->genome=genome0;
+    this->numins = genome0->wdt;
+    state.Resize(this->numins);
   }
   /* ********************************************************************** */
   void Clear_State() {
-    this->state->Fill(1.0);
+    this->state.Fill(1.0);
   }
   #if LinkOrg
   /* ********************************************************************** */
   void Run_Org() {
-    genome->Iterate(state, Num_Matrix_Iterations, state);// using the same vector for input and output
+    genome->Iterate(&state, Num_Matrix_Iterations, &state);// using the same vector for input and output
   }
   #endif // LinkOrg
   /* ********************************************************************** */
   void DeState() {// remove all stateful information from org/matrix, but keep weight
-    state->Fill(0.0);
+    state.Fill(0.0);
   }
 };
 

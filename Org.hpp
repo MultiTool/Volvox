@@ -25,8 +25,8 @@ public:
   Org(int wdt0, int hgt0) : Matrix(wdt0, hgt0) {
   }
   /* ********************************************************************** */
-  static OrgPtr Abiogenate() {
-    OrgPtr child = new Org(DefaultWdt, DefaultHgt);
+  static OrgPtr Abiogenate(size_t Wdt, size_t Hgt) {
+    OrgPtr child = new Org(Wdt, Hgt);
     child->Rand_Init();
     return child;
   }

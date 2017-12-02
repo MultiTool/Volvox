@@ -102,7 +102,7 @@ public:
     siz = this->InLinks.size();
     for (size_t cnt=0; cnt<siz; cnt++) {
       ups = this->InLinks.at(cnt);// read link output vector here, and add it to my own
-      this->CrossRoads->Add_To_Me(ups->state, VecTradeSize);
+      this->CrossRoads->Add_To_Me(&(ups->state), VecTradeSize);
     }
   }
   /* ********************************************************************** */
@@ -112,7 +112,7 @@ public:
     siz = this->OutLinks.size();
     for (size_t cnt=0; cnt<siz; cnt++) {
       downs = this->OutLinks.at(cnt);// after summing/processing the node vector, push it out to the input vectors of all links
-      downs->state->Copy_From(this->CrossRoads, VecTradeSize);
+      downs->state.Copy_From(this->CrossRoads, VecTradeSize);
     }
   }
   /* ********************************************************************** */
