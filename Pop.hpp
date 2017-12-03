@@ -3,6 +3,7 @@
 
 #include "Org.hpp"
 #include "Tester.hpp"
+#include "Stats.hpp"
 
 //#define popmax 1000
 #define popmax 100
@@ -15,20 +16,6 @@
 to do: define creature matrix size from inside pop.
 so each pop can have a custom monster size.
 */
-
-/* ********************************************************************** */
-class Stat {
-public:
-  double Min, Max, Avg;
-  double StandardDev;// ??
-};
-/* ********************************************************************** */
-class PopStats { // for hundreds of trials
-public:
-  Stat Score;// min max avg score for N trials with all the same parameters, but maybe a variety of models.
-  Stat FinalGen;// generation number where we won or lost
-  void Print_Me(){}
-};
 
 /* ********************************************************************** */
 class Pop;// forward
