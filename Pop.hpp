@@ -38,6 +38,8 @@ public:
   double SumScores=0, AvgTopDigi=0.0;
   double AllTimeTopScore=0.0;
   double CurrentTopScore=0.0;
+  PopStatsPtr StatPack = nullptr;
+
   /* ********************************************************************** */
   Pop() {
   }
@@ -57,6 +59,10 @@ public:
   /* ********************************************************************** */
   void Attach_Tester(TesterPtr tester0) {// got rid of all internal creation and deletion of testers.  Any tester should be passed to pop as a parameter.
     this->tester = tester0;
+  }
+  /* ********************************************************************** */
+  void Attach_Stats(PopStatsPtr stats) {// got rid of all internal creation and deletion of testers.  Any tester should be passed to pop as a parameter.
+    this->StatPack = stats;
   }
   /* ********************************************************************** */
   void InitPop(int popsize, int orgsize) {// Create and seed the population of creatures.
@@ -93,7 +99,8 @@ mutate children
       int AbortCnt=0;
       printf("\nRetryCnt:%i\n", RetryCnt);
       //printf("Gen:%i\n", GenCnt);
-      for (int gcnt=0;gcnt<MaxOrgGens;gcnt++){
+      int GenCnt=0;
+      for (GenCnt=0;GenCnt<MaxOrgGens;GenCnt++){
         //printf("Gen:%i\n", GenCnt);
         this->Gen();
         CurrentTopScoreLocal=this->GetTopScore();
@@ -114,6 +121,10 @@ mutate children
       }
       OrgPtr TopOrg = this->GetTopOrg();
       tester->Print_Org(TopOrg);
+      if (this->StatPack != nullptr){
+        this->StatPack->Score.Collect(TopOrg->Score[0]);
+        this->StatPack->FinalGen.Collect(GenCnt);
+      }
       //std::cin.getline(name,256);
     }
   }

@@ -41,6 +41,23 @@ int main() {
   printf("randseed:%lld\n", (long long)timer);
   srand(timer);
   char name[256];
+  if (false){// test stddev changes
+    double measure;
+    Stat stat0, stat1;
+    measure=frand() * 10.0;
+    stat0.FirstSample(measure);
+    stat1.Init(); stat1.Collect(measure);
+    printf("stat0.NumSamples:%f, stat1.NumSamples:%f\n", stat0.NumSamples, stat1.NumSamples);
+    printf("stat0:%f, stat1:%f\n", stat0.PowerSum, stat1.PowerSum);
+    for (int cnt=0;cnt<10;cnt++){
+      measure=frand() * 10.0;
+      stat0.Collect(measure);
+      stat1.Collect(measure);
+      printf("stat0.NumSamples:%f, stat1.NumSamples:%f\n", stat0.NumSamples, stat1.NumSamples);
+      printf("stat0:%f, stat1:%f\n", stat0.GetStdDev(), stat1.GetStdDev());
+    }
+    return 0;
+  }
   if (true) {
     LabPtr lab = new Lab();
     lab->Run_Test();

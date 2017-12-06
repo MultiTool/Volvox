@@ -47,6 +47,9 @@ public:
     int OrgSize = model->wdt;
     //OrgSize += 2;
     //OrgSize *= 2;
+
+    PopStatsPtr StatPack = new PopStats();
+    StatPack->Init();
     printf("Evo_Mx, OrgSize:%i\n", OrgSize);
     //printf("Model Sanity0:\n"); model->Print_Me();
     TesterMxLoopPtr tester=new TesterMxLoop(Org::DefaultWdt, Org::DefaultHgt);
@@ -58,9 +61,11 @@ public:
     int EvoStagnationLimit = 1500;//200;//
     pop->Assign_Params(100, OrgSize, tester, /* MaxOrgGens */ 10000, 2, /* EvoStagnationLimit */ EvoStagnationLimit);
     //printf("Model Sanity2:\n"); ((TesterMxLoopPtr)(pop->tester))->model->Print_Me();
+    pop->Attach_Stats(StatPack);// error, first sample is not initialized.
     pop->Evolve();
     delete pop;
     delete tester;
+    delete StatPack;
   }
   /* ********************************************************************** */
   TesterPtr Init_Tester() {
