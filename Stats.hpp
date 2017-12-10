@@ -25,7 +25,7 @@ public:
     this->UpdateStDev(Measurement);
   }
   /* ********************************************************************** */
-  void FirstSample(double FirstMeasurement){
+  void FirstSample(double FirstMeasurement){// Initialize stats using a first sample value.
     this->NumSamples=1; this->Sum = FirstMeasurement;
     this->Avg = this->Max = this->Min = FirstMeasurement; //this->Min =std::numeric_limits<double>::infinity(); this->Max =-std::numeric_limits<double>::infinity();
     this->StartStandardDeviation(FirstMeasurement);
@@ -52,12 +52,13 @@ public:
     this->PowerSum = this->PowerSum + (Measurement - this->PrevWorkData) * (Measurement - this->WorkData);
   }
   /* ********************************************************************** */
-  // Performs the final step needed to get the standard deviation and returns it.
-  double GetStdDev() {
+  double GetStdDev() {// Performs the final step needed to get the standard deviation and returns it.
     return std::sqrt(this->PowerSum / (this->NumSamples - 1.0));
   }
   /* ********************************************************************** */
-  void Print_Me(){}
+  void Print_Me(){
+    printf("Min:%1.4f, Max:%1.4f, Avg:%1.4f, StdDev:%1.4f ", Min, Max, Avg, GetStdDev());
+  }
 };
 
 /* ********************************************************************** */
@@ -71,13 +72,21 @@ public:
   void Init(){
     Score.Init(); FinalGen.Init();
   }
-  void Print_Me(){}
+  void Print_Me(){
+    printf("Score_Stats: ");
+    Score.Print_Me();
+    printf("\n");
+    printf("Length_Stats: ");
+    FinalGen.Print_Me();
+    printf("\n");
+  }
 };
 
 #endif // STATS_HPP_INCLUDED
 
 
-/*  // https://gist.github.com/qubyte/4064710
+/*
+https://github.com/qubyte, https://gist.github.com/qubyte/4064710
 // A standard deviation object constructor. Running deviation (avoid growing arrays) which
 // is round-off error resistant. Based on an algorithm found in a Knuth book.
 function StandardDeviation(firstMeasurement) {

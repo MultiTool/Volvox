@@ -122,7 +122,7 @@ mutate children
       OrgPtr TopOrg = this->GetTopOrg();
       tester->Print_Org(TopOrg);
       if (this->StatPack != nullptr){
-        this->StatPack->Score.Collect(TopOrg->Score[0]);
+        this->StatPack->Score.Collect(TopOrg->Score[2]);
         this->StatPack->FinalGen.Collect(GenCnt);
       }
       //std::cin.getline(name,256);
@@ -170,15 +170,17 @@ mutate children
       //printf("GenCnt:%4d, TopScore:%24.17g, TopDigiScore:%f, ModelStateMag:%f\n", this->GenCnt, CurrentTopScore, TopDigiScore, ModelStateMag);
       //printf("GenCnt:%4d, TopScore0:%24.17g, TopScore1:%24.17g\n", this->GenCnt, CurrentTopScore, TopDigiScore);// full resolution of double
       //printf("GenCnt:%4d, TopScore0:%1.20g, TopScore1:%1.20g\n", this->GenCnt, CurrentTopScore, TopDigiScore);
-      printf("GenCnt:%4d, ", this->GenCnt);
-      TopOrg->Print_Scores();
-      printf("\n");
+      if (false){
+        printf("GenCnt:%4d, ", this->GenCnt);
+        TopOrg->Print_Scores();
+        printf("\n");
+      }
     }
   }
   /* ********************************************************************** */
   void Print_Results() {
     //printf("Print_Results\n");
-    OrgPtr TopOrg = Forest[0];
+    OrgPtr TopOrg = this->GetTopOrg();
 
     if (false){
       printf("Model Matrix\n");
@@ -192,7 +194,12 @@ mutate children
     AvgTopDigi=(AvgTopDigi*0.9) + (TopDigiScore*0.1);
     //printf("GenCnt:%i, TopScore:%f, AvgTopDigi:%f, TopDigiScore:%f\n", this->GenCnt, TopScore, AvgTopDigi, TopDigiScore);
     //printf("GenCnt:%4d, TopScore0:%24.17g, TopScore1:%24.17g\n", this->GenCnt, TopScore, TopDigiScore);// full resolution of double
-    printf("GenCnt:%4d, TopScore0:%1.20g, TopScore1:%1.20g\n", this->GenCnt, CurrentTopScore, TopDigiScore);
+    //printf("GenCnt:%4d, TopScore0:%1.20g, TopScore1:%1.20g\n", this->GenCnt, CurrentTopScore, TopDigiScore);
+    if (true){
+      printf("GenCnt:%4d, ", this->GenCnt);
+      TopOrg->Print_Scores();
+      printf("\n");
+    }
   }
   /* ********************************************************************** */
   OrgPtr CloneTopOrg() {// deliver copy of top org that will outlive this whole population instance.

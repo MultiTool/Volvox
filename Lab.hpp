@@ -46,7 +46,7 @@ public:
   void Evo_Mx(MatrixPtr model, VectPtr StartingState) {
     int OrgSize = model->wdt;
     //OrgSize += 2;
-    //OrgSize *= 2;
+    OrgSize *= 2;
 
     PopStatsPtr StatPack = new PopStats();
     StatPack->Init();
@@ -58,11 +58,13 @@ public:
     printf("MxLoop StartingState:\n"); tester->StartingState->Print_Me();
     //printf("MxLoop Model Sanity1:\n"); tester->model->Print_Me();
     PopPtr pop = new Pop();
+    int Retries = 16;
     int EvoStagnationLimit = 1500;//200;//
-    pop->Assign_Params(100, OrgSize, tester, /* MaxOrgGens */ 10000, 2, /* EvoStagnationLimit */ EvoStagnationLimit);
+    pop->Assign_Params(100, OrgSize, tester, /* MaxOrgGens */ 10000, Retries, /* EvoStagnationLimit */ EvoStagnationLimit);
     //printf("Model Sanity2:\n"); ((TesterMxLoopPtr)(pop->tester))->model->Print_Me();
     pop->Attach_Stats(StatPack);// error, first sample is not initialized.
     pop->Evolve();
+    printf("\n"); StatPack->Print_Me();
     delete pop;
     delete tester;
     delete StatPack;
