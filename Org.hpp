@@ -14,7 +14,9 @@ public:
   bool Doomed = false;
   double ModelStateMag;
   //MatrixPtr matrix;
-  static const int DefaultWdt = 4, DefaultHgt = 4;
+  //static const int DefaultWdt = 2, DefaultHgt = 2;
+  static const int DefaultWdt = 3, DefaultHgt = 3;
+  //static const int DefaultWdt = 4, DefaultHgt = 4;
   //static const int DefaultWdt = 5, DefaultHgt = 5;
   //static const int DefaultWdt = 6, DefaultHgt = 6;
   //static const int DefaultWdt = 8, DefaultHgt = 8;

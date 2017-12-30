@@ -51,6 +51,11 @@ using namespace __gnu_cxx;
 //#define INT32_MIN (~(uint32_t)0)
 #endif
 
+#ifndef PI
+#define PI 3.141592653589793238462643383279502884197169399375105820974944592307816406286
+#define TwoPi (PI*2.0)
+#endif
+
 // #define Fudge (0.0000000000000000000001) // DBL_EPSILON  ?
 //#define Fudge (DBL_EPSILON*2)
 //#define Fudge (2.01e-015) // like epsilon, but epsilon tends to disappear during some math operations

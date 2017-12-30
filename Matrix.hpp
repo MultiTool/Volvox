@@ -129,6 +129,19 @@ public:
     return std::sqrt(this->ray.size());
   }
   /* ********************************************************************** */
+  double GetWaveEnergy() {// crude wave energy measure
+    int ln = this->ray.size();
+    double prevamp, delta;// energy is defined here as the sum of all changes
+    double EnergySum = 0, amp = 0;
+    for (int cnt = 0; cnt < ln; cnt++) {
+      prevamp = amp;
+      amp = this->ray[cnt];
+      delta = amp - prevamp;
+      EnergySum += fabs(delta);// EnergySum += (delta * delta);// or this?
+    }
+    return EnergySum;
+  }
+  /* ********************************************************************** */
   double MultFire(Vect* other) {
     double Sum = this->Mult(other);
     return ActFun(Sum);

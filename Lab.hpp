@@ -29,7 +29,7 @@ public:
     delete tester;
   }
   /* ********************************************************************** */
-  void Evo_Model(MatrixPtr &model, VectPtr &StartingState) {// to do: move to outside of pop class
+  void Evo_Model(MatrixPtr &model, VectPtr &StartingState) {// Evolve a matrix model toward 'interestingness'.
     int ModelSize = Org::DefaultWdt;
     printf("Evo_Model, ModelSize:%i\n", ModelSize);
     TesterMxWobblePtr wobbletester = new TesterMxWobble(Org::DefaultWdt, Org::DefaultHgt);
@@ -46,7 +46,7 @@ public:
   void Evo_Mx(MatrixPtr model, VectPtr StartingState) {
     int OrgSize = model->wdt;
     //OrgSize += 2;
-    OrgSize *= 2;
+    //OrgSize *= 2;
 
     PopStatsPtr StatPack = new PopStats();
     StatPack->Init();
@@ -58,7 +58,7 @@ public:
     printf("MxLoop StartingState:\n"); tester->StartingState->Print_Me();
     //printf("MxLoop Model Sanity1:\n"); tester->model->Print_Me();
     PopPtr pop = new Pop();
-    int Retries = 16;
+    int Retries = 100;//16;
     int EvoStagnationLimit = 1500;//200;//
     pop->Assign_Params(100, OrgSize, tester, /* MaxOrgGens */ 10000, Retries, /* EvoStagnationLimit */ EvoStagnationLimit);
     //printf("Model Sanity2:\n"); ((TesterMxLoopPtr)(pop->tester))->model->Print_Me();
