@@ -32,7 +32,7 @@ public:
   const double MutRate=0.2;//0.5;//0.3;//0.8//0.6;//0.99;//
   int MaxOrgGens = 10000;//10000;//1000000;//50;//
   int MaxRetries = 1;//4;//2;//16;
-  size_t OrgSize = -1;//Org::DefaultWdt;// snox here there be problems - org matrix size needs to be determined flexibly by pop.
+  size_t OrgWdt = -1, OrgHgt = -1;//Org::DefaultWdt;// snox here there be problems - org matrix size needs to be determined flexibly by pop.
   uintmax_t EvoStagnationLimit = 1500;//16384;//3000;// 5000;//100;//75;//50;
   size_t NumSurvivors;
   double SumScores=0, AvgTopDigi=0.0;
@@ -54,7 +54,20 @@ public:
     this->MaxOrgGens = MaxOrgGens0;
     this->MaxRetries = MaxRetries0;
     this->EvoStagnationLimit = EvoStagnationLimit0;
-    this->InitPop(popsize0, OrgSize0);
+    this->OrgWdt = OrgSize0; this->OrgHgt = OrgSize0;
+    this->popsz = popsize0;
+    this->InitPop();
+  }
+  /* ********************************************************************** */
+  void InitPop() {// Create and seed the population of creatures.
+    Org *org;
+    int pcnt;
+    Forest.resize(popsz);
+    for (pcnt=0; pcnt<popsz; pcnt++) {
+      org = Org::Abiogenate(OrgWdt, OrgHgt);
+      Forest.at(pcnt) = org;
+    }
+    NumSurvivors = popsz * SurvivalRate;
   }
   /* ********************************************************************** */
   void Attach_Tester(TesterPtr tester0) {// got rid of all internal creation and deletion of testers.  Any tester should be passed to pop as a parameter.
@@ -63,19 +76,6 @@ public:
   /* ********************************************************************** */
   void Attach_Stats(PopStatsPtr stats) {// got rid of all internal creation and deletion of testers.  Any tester should be passed to pop as a parameter.
     this->StatPack = stats;
-  }
-  /* ********************************************************************** */
-  void InitPop(int popsize, int orgsize) {// Create and seed the population of creatures.
-    Org *org;
-    int pcnt;
-    this->popsz = popsize;
-    this->OrgSize = orgsize;
-    Forest.resize(popsize);
-    for (pcnt=0; pcnt<popsize; pcnt++) {
-      org = Org::Abiogenate(OrgSize, OrgSize);
-      Forest.at(pcnt) = org;
-    }
-    NumSurvivors = popsize * SurvivalRate;
   }
   /*
 We want this instead:

@@ -114,7 +114,7 @@ for OrgSize (8 and 16) {
       pop.Get_Stats(&StatObj);
     }
   }
-  StatObj.Print_Me();
+  StatObj.Print_Me();Evo_Mx
 }// orgsize
 
 */
