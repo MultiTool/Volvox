@@ -48,15 +48,19 @@ public:
     this->Clear();
   }
   /* ********************************************************************** */
-  void Assign_Params(int popsize0, int OrgSize0, TesterPtr tester0, int MaxOrgGens0, int MaxRetries0, uintmax_t EvoStagnationLimit0) {
+  void Assign_Params(int popsize0, int OrgWdt0, int OrgHgt0, TesterPtr tester0, int MaxOrgGens0, int MaxRetries0, uintmax_t EvoStagnationLimit0) {
     this->Clear();// delete previous population, if any.
     this->Attach_Tester(tester0);
     this->MaxOrgGens = MaxOrgGens0;
     this->MaxRetries = MaxRetries0;
     this->EvoStagnationLimit = EvoStagnationLimit0;
-    this->OrgWdt = OrgSize0; this->OrgHgt = OrgSize0;
+    this->OrgWdt = OrgWdt0; this->OrgHgt = OrgHgt0;
     this->popsz = popsize0;
     this->InitPop();
+  }
+  /* ********************************************************************** */
+  void Assign_Params(int popsize0, int OrgSize0, TesterPtr tester0, int MaxOrgGens0, int MaxRetries0, uintmax_t EvoStagnationLimit0) {
+    this->Assign_Params(popsize0, OrgSize0, OrgSize0, tester0, MaxOrgGens0, MaxRetries0, EvoStagnationLimit0);
   }
   /* ********************************************************************** */
   void InitPop() {// Create and seed the population of creatures.
@@ -104,7 +108,7 @@ mutate children
         //printf("Gen:%i\n", GenCnt);
         this->Gen();
         CurrentTopScoreLocal=this->GetTopScore();
-        if (CurrentTopScoreLocal>=1.0){ break; }
+        if (CurrentTopScoreLocal>=1.0){ printf("Maximized.\n"); break; }
         if (AllTimeTopScore<CurrentTopScoreLocal){
           AbortCnt=0; AllTimeTopScore=CurrentTopScoreLocal;
         }else{
@@ -119,6 +123,7 @@ mutate children
         }
         this->Print_Results();
       }
+      printf("Final GenCnt:%i\n", GenCnt);
       OrgPtr TopOrg = this->GetTopOrg();
       tester->Print_Org(TopOrg);
       if (this->StatPack != nullptr){

@@ -401,6 +401,50 @@ public:
   }
 };
 
+
+/* ********************************************************************** */
+class TesterVect;// forward
+typedef TesterVect *TesterVectPtr;
+typedef std::vector<TesterVectPtr> TesterVectVec;
+class TesterVect : public Tester {// evolve to create a vector with max wave energy (max changes, as we define it)
+public:
+  /* ********************************************************************** */
+  TesterVect(){
+  }
+  /* ********************************************************************** */
+  ~TesterVect(){
+  }
+  /* ********************************************************************** */
+  void Reset_Input() override {// once per generation
+  }
+  /* ********************************************************************** */
+  void Test(OrgPtr candidate) override {
+    VectPtr vect = candidate->ray[0];
+    vect->Clip_Me(1.0);// hacky. here we modify the Org's genome in a test.
+    double Range = vect->MaxLen();
+    double Energy;
+    Energy = vect->GetWaveEnergy()/((double)vect->len-1);// len-1 because we only measure differences between numbers, always one less.
+    Energy *= 0.5;
+    candidate->Score[0]=Energy;// to do: find a scoring system whose max is 1.0
+  }
+  /* ********************************************************************** */
+  void Print_Me() override {
+    //printf("TesterMxLoop class not implemented yet.\n");
+  }
+  /* ********************************************************************** */
+  void Print_Org(OrgPtr candidate) override {
+    printf("Top Org:\n");
+    VectPtr vect = candidate->ray[0];
+    //Energy = candidate->ray[0]->GetWaveEnergy();
+    candidate->Print_Me();
+    printf("\n");
+    printf("Score0:%24.17g, Score1:%24.17g\n", candidate->Score[0], candidate->Score[1]);
+  }
+  /* ********************************************************************** */
+  void Attach_StartingState(VectPtr StartingState0) override {
+  }
+};
+
 /* ********************************************************************** */
 class TesterNet;// forward
 typedef TesterNet *TesterNetPtr;

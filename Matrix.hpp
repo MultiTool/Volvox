@@ -67,6 +67,14 @@ public:
     }
   }
   /* ********************************************************************** */
+  void Clip_Me(double Limit) {
+    int ln = this->len;
+    for (int cnt=0; cnt<ln; cnt++) {
+      if (this->ray[cnt]>Limit){ this->ray[cnt]=Limit; }
+      else if (this->ray[cnt]<-Limit){ this->ray[cnt]=-Limit; }
+    }
+  }
+  /* ********************************************************************** */
   void Add(VectPtr other, VectPtr result) {
     int ln = std::min(this->len, other->len);
     for (int cnt=0; cnt<ln; cnt++) {
@@ -131,9 +139,10 @@ public:
   /* ********************************************************************** */
   double GetWaveEnergy() {// crude wave energy measure
     int ln = this->ray.size();
+    if (ln<=1){ return 0.0; }// no data, no energy
     double prevamp, delta;// energy is defined here as the sum of all changes
-    double EnergySum = 0, amp = 0;
-    for (int cnt = 0; cnt < ln; cnt++) {
+    double EnergySum = 0, amp = this->ray[0];
+    for (int cnt = 1; cnt < ln; cnt++) {
       prevamp = amp;
       amp = this->ray[cnt];
       delta = amp - prevamp;
@@ -199,7 +208,6 @@ public:
   }
   /* ********************************************************************** */
   double Score_Similarity(VectPtr other, int Length, double &digiscore, double &MultiDigiProduct){// strictly for genalg scoring
-  //double Score_Similarity(VectPtr other, int Length, double &digiscore){// strictly for genalg scoring
     int ln = std::min(std::min(this->len, other->len), Length);
     double range = 2.0;//1.0;//
     double val0, val1, digival0, digival1, diff, digidiff, DigiProduct=1.0;

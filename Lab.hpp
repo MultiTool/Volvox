@@ -12,6 +12,26 @@ class Lab {// Laboratory
 public:
   /* ********************************************************************** */
   void Run_Test() {
+    switch (2) {
+    case 0:
+      Test0();
+      break;
+    case 1:
+      Test1();
+      break;
+    case 2:
+      Test_Energy();
+      break;
+    }
+  }
+  /* ********************************************************************** */
+  void Test_Energy() {
+    MatrixPtr TopOrg = nullptr;
+    Evo_Vect(TopOrg);
+    delete TopOrg;
+  }
+  /* ********************************************************************** */
+  void Test0() {
     MatrixPtr model = nullptr;
     VectPtr StartingState = nullptr;
     Evo_Model(model, StartingState);
@@ -20,7 +40,7 @@ public:
     delete StartingState;
   }
   /* ********************************************************************** */
-  void Run_Test2() {
+  void Test1() {
     PopPtr pop = new Pop();
     TesterPtr tester = Init_Tester();
     pop->Attach_Tester(tester);// MUST create and attach a tester.
@@ -70,9 +90,22 @@ public:
     delete StatPack;
   }
   /* ********************************************************************** */
+  void Evo_Vect(MatrixPtr &TopOrg) {// Evolve a matrix model toward 'interestingness'.
+    int OrgWdt = 64;//4;//16;//32;//Org::DefaultWdt;
+    int OrgHgt = 1;
+    printf("Evo_Vect, OrgWdt:%i, OrgHgt:%i\n", OrgWdt, OrgHgt);
+    TesterVectPtr vectester = new TesterVect();
+    PopPtr pop = new Pop();
+    pop->Assign_Params(100, OrgWdt, OrgHgt, vectester, /* MaxOrgGens */ 10000, 1, /* EvoStagnationLimit */ 30000);
+    pop->Evolve();
+    TopOrg = pop->CloneTopOrg();
+    delete pop;
+    delete vectester;
+  }
+  /* ********************************************************************** */
   TesterPtr Init_Tester() {
     TesterPtr tester = nullptr;
-    switch (1){
+    switch (1) {
     case 0:
       tester=new TesterMx(Org::DefaultWdt, Org::DefaultHgt);
       break;
@@ -92,32 +125,32 @@ public:
   }
   /* ********************************************************************** */
   void Big_Survey(MatrixPtr model, VectPtr StartingState) {
-/*
-Next:
-create a 'package' of instances executed with the same parameters to statistically score those parameters.  How many instances?  50? 100?
+    /*
+    Next:
+    create a 'package' of instances executed with the same parameters to statistically score those parameters.  How many instances?  50? 100?
 
-margin of error = 1/sqrt(popsize)
+    margin of error = 1/sqrt(popsize)
 
-1/(400^0.5) = 0.5, so if score is 90%, we would be 95% certain the results are between 85% and 95%.
+    1/(400^0.5) = 0.5, so if score is 90%, we would be 95% certain the results are between 85% and 95%.
 
-generate models;
-tester = new TesterMxLoop();
-pop.Attach(tester);
-for OrgSize (8 and 16) {
-  StatObj = new Stats();
-  pop.SetOrgSize(orgsize);
-  for all Models {
-    tester.Attach(model);
-    for each sample {// do this about 400 times. each time is a new evolution with all the same parameters
-      pop.Reset();
-      pop.Evolve();// here is all the same tester, model, and parameters.
-      pop.Get_Stats(&StatObj);
-    }
-  }
-  StatObj.Print_Me();Evo_Mx
-}// orgsize
+    generate models;
+    tester = new TesterMxLoop();
+    pop.Attach(tester);
+    for OrgSize (8 and 16) {
+      StatObj = new Stats();
+      pop.SetOrgSize(orgsize);
+      for all Models {
+        tester.Attach(model);
+        for each sample {// do this about 400 times. each time is a new evolution with all the same parameters
+          pop.Reset();
+          pop.Evolve();// here is all the same tester, model, and parameters.
+          pop.Get_Stats(&StatObj);
+        }
+      }
+      StatObj.Print_Me();Evo_Mx
+    }// orgsize
 
-*/
+    */
   }
 };
 

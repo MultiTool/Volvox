@@ -64,12 +64,6 @@ int main() {
     delete lab;
     return 0;
   }
-  {
-    LabPtr lab = new Lab();
-    lab->Run_Test2();
-    delete lab;
-    return 0;
-  }
   return 0;
 }
 
