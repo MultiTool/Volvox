@@ -20,6 +20,9 @@ public:
       Test1();
       break;
     case 2:
+      Test2();
+      break;
+    case 3:
       Test_Energy();
       break;
     }
@@ -53,16 +56,20 @@ public:
     MatrixPtr model = nullptr;
     VectPtr StartingState = new Vect();// to do: we need to define starting state length as equal to model width, as well as to fill it with - what?
     MatrixPtr TopOrg = nullptr;
-    Evo_Model(model, StartingState);// ideally we want to pre-define StartingState as what?  zero vector?
+    int ModelWdt = 8, ModelHgt = ModelWdt;
+    printf("Echo Lab, ModelWdt:%i, ModelHgt:%i\n", ModelWdt, ModelHgt);
+    Evo_Model(ModelWdt, model, StartingState);// ideally we want to pre-define StartingState as what?  zero vector?
     Evo_Echo(model, TopOrg);
+    // next, we must print the winning org, but also the waveform that comes out when it is fed through the model.
+    // we also want to compare retries to see how much they vary.
     delete model;
     delete StartingState;
+    delete TopOrg;
   }
   /* ********************************************************************** */
-  void Evo_Model(MatrixPtr &BestModel, VectPtr &StartingState) {// Evolve a matrix model toward 'interestingness'.
-    int ModelSize = Org::DefaultWdt;
+  void Evo_Model(int ModelSize, MatrixPtr &BestModel, VectPtr &StartingState) {// Evolve a matrix model toward 'interestingness'.
     printf("Evo_Model, ModelSize:%i\n", ModelSize);
-    TesterMxWobblePtr wobbletester = new TesterMxWobble(Org::DefaultWdt, Org::DefaultHgt);
+    TesterMxWobblePtr wobbletester = new TesterMxWobble(ModelSize, ModelSize);
     if (StartingState == nullptr){// if no starting state, copy the default one and pass it outward.
       StartingState = wobbletester->StartingState->Clone_Me();
     } else {// if a starting state is predefined, use that.
@@ -74,6 +81,11 @@ public:
     BestModel = pop->CloneTopOrg();//org->Copy_From(pop->GetTopOrg());
     delete pop;
     delete wobbletester;
+  }
+  /* ********************************************************************** */
+  void Evo_Model(MatrixPtr &BestModel, VectPtr &StartingState) {// Evolve a matrix model toward 'interestingness'.
+    int ModelSize = Org::DefaultWdt;
+    Evo_Model(ModelSize, BestModel, StartingState);
   }
   /* ********************************************************************** */
   void Evo_Mx(MatrixPtr model, VectPtr StartingState) {
@@ -119,14 +131,17 @@ public:
   void Evo_Echo(MatrixPtr model, MatrixPtr &TopOrg) {// Evolve a wave vector to evoke the highest-energy wave from a model
     int OrgWdt = 64;//4;//16;//32;
     int OrgHgt = 1;
-    int ModelWdt = 8, ModelHgt = ModelWdt;
+    int ModelWdt = model->wdt, ModelHgt = ModelWdt;
     printf("Evo_Echo, OrgWdt:%i, OrgHgt:%i, ModelWdt:%i, ModelHgt:%i\n", OrgWdt, OrgHgt, ModelWdt, ModelHgt);
-    TesterEchoPtr vectester = new TesterEcho(ModelWdt, ModelHgt);
+    //printf("Evo_Echo, OrgWdt:%i, OrgHgt:%i\n", OrgWdt, OrgHgt);
+    TesterEchoPtr vectester = new TesterEcho();
     vectester->Attach_Model(model);
     PopPtr pop = new Pop();
     pop->Assign_Params(100, OrgWdt, OrgHgt, vectester, /* MaxOrgGens */ 10000, 1, /* EvoStagnationLimit */ 30000);
     pop->Evolve();
     TopOrg = pop->CloneTopOrg();
+    printf("Print_Echo\n");
+    vectester->Print_Echo(TopOrg);
     delete pop;
     delete vectester;
   }

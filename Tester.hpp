@@ -669,13 +669,10 @@ public:
   const static uint32_t TestRuns = 100;
   int External_Node_Number=-1, Total_Node_Number=-1;// deliberately crashing values
   MatrixPtr model=nullptr;// behavior to imitate
-  int MxWdt, MxHgt;
+  int MxWdt=-1, MxHgt=-1;
   int ModelIterations=10;
   /* ********************************************************************** */
-  TesterEcho(int MxWdt0, int MxHgt0){
-    this->MxWdt=MxHgt0; this->MxHgt=MxHgt0;
-    External_Node_Number=1; Total_Node_Number=this->MxWdt;// External_Node_Number is the number of sensorymotor (I/O) nodes in the model
-    printf("\n");
+  TesterEcho(){
   }
   /* ********************************************************************** */
   ~TesterEcho(){
@@ -723,6 +720,9 @@ public:
     printf("Score0:%24.17g, Score1:%24.17g\n", candidate->Score[0], candidate->Score[1]);
   }
   /* ********************************************************************** */
+  void Profile_Model(MatrixPtr CurrentModel) override {
+  }
+  /* ********************************************************************** */
   void Attach_StartingState(VectPtr StartingState0) override {
   }
   /* ********************************************************************** */
@@ -730,7 +730,30 @@ public:
     this->Clear_Model();
     this->model = model0;
     this->MxWdt=this->model->wdt; this->MxHgt=this->model->hgt;
-    Total_Node_Number=this->MxWdt; External_Node_Number=Total_Node_Number/2;
+    Total_Node_Number=this->MxWdt; External_Node_Number=1; // External_Node_Number is the number of sensorymotor (I/O) nodes in the model
+  }
+  /* ********************************************************************** */
+  void Print_Echo(MatrixPtr candidate) {
+    VectPtr InVect = candidate->ray[0];
+    int NumCycles = InVect->len;
+    Vect OutSignal(NumCycles);
+    Vect ModelState(this->MxWdt);
+    double EnergyIn = 0, EnergyOut = 0;
+    int Iterations = 1;
+    EnergyIn = InVect->GetWaveEnergy();
+    double Score = 0;
+    for (int CycleCnt=0; CycleCnt<NumCycles; CycleCnt++) {// CycleCnt could be TCnt instead
+      double SignalIn = InVect->ray[CycleCnt];
+      ModelState.ray[0] = SignalIn;
+      model->Iterate(&ModelState, Iterations, &ModelState);
+      double SignalOut = ModelState.ray[0];
+      OutSignal.ray[CycleCnt] = SignalOut;
+      printf("%f, %f\n", SignalIn, SignalOut);
+    }
+    EnergyOut = OutSignal.GetWaveEnergy();
+    Score = EnergyOut - EnergyIn;// or EnergyOut/EnergyIn ?
+    printf("EnergyIn:%f, EnergyOut:%f\n", EnergyIn, EnergyOut);
+    OutSignal.Print_Me();
   }
 };
 
