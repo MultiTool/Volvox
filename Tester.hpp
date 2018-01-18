@@ -401,50 +401,6 @@ public:
   }
 };
 
-
-/* ********************************************************************** */
-class TesterVect;// forward
-typedef TesterVect *TesterVectPtr;
-typedef std::vector<TesterVectPtr> TesterVectVec;
-class TesterVect : public Tester {// evolve to create a vector with max wave energy (max changes, as we define it)
-public:
-  /* ********************************************************************** */
-  TesterVect(){
-  }
-  /* ********************************************************************** */
-  ~TesterVect(){
-  }
-  /* ********************************************************************** */
-  void Reset_Input() override {// once per generation
-  }
-  /* ********************************************************************** */
-  void Test(OrgPtr candidate) override {
-    VectPtr vect = candidate->ray[0];
-    vect->Clip_Me(1.0);// hacky. here we modify the Org's genome in a test.
-    double Range = vect->MaxLen();
-    double Energy;
-    Energy = vect->GetWaveEnergy()/((double)vect->len-1);// len-1 because we only measure differences between numbers, always one less.
-    Energy *= 0.5;
-    candidate->Score[0]=Energy;// to do: find a scoring system whose max is 1.0
-  }
-  /* ********************************************************************** */
-  void Print_Me() override {
-    //printf("TesterMxLoop class not implemented yet.\n");
-  }
-  /* ********************************************************************** */
-  void Print_Org(OrgPtr candidate) override {
-    printf("Top Org:\n");
-    VectPtr vect = candidate->ray[0];
-    //Energy = candidate->ray[0]->GetWaveEnergy();
-    candidate->Print_Me();
-    printf("\n");
-    printf("Score0:%24.17g, Score1:%24.17g\n", candidate->Score[0], candidate->Score[1]);
-  }
-  /* ********************************************************************** */
-  void Attach_StartingState(VectPtr StartingState0) override {
-  }
-};
-
 /* ********************************************************************** */
 class TesterNet;// forward
 typedef TesterNet *TesterNetPtr;
@@ -657,6 +613,124 @@ model subset output then overwrites bpnet output, becomes input
       Mag = StartingState->Magnitude();
       printf("Seed Mag:%f\n", Mag);
     } while (Mag<1.0);
+  }
+};
+
+/* ********************************************************************** */
+class TesterVect;// forward
+typedef TesterVect *TesterVectPtr;
+typedef std::vector<TesterVectPtr> TesterVectVec;
+class TesterVect : public Tester {// evolve to create a vector with max wave energy (max changes, as we define it)
+public:
+  /* ********************************************************************** */
+  TesterVect(){
+  }
+  /* ********************************************************************** */
+  ~TesterVect(){
+  }
+  /* ********************************************************************** */
+  void Reset_Input() override {// once per generation
+  }
+  /* ********************************************************************** */
+  void Test(OrgPtr candidate) override {
+    VectPtr vect = candidate->ray[0];
+    vect->Clip_Me(1.0);// hacky. here we modify the Org's genome in a test.
+    double Range = vect->MaxLen();
+    double Energy;
+    Energy = vect->GetWaveEnergy()/((double)vect->len-1);// len-1 because we only measure differences between numbers, always one less.
+    Energy *= 0.5;
+    candidate->Score[0]=Energy;// to do: find a scoring system whose max is 1.0
+  }
+  /* ********************************************************************** */
+  void Print_Me() override {
+    //printf("TesterMxLoop class not implemented yet.\n");
+  }
+  /* ********************************************************************** */
+  void Print_Org(OrgPtr candidate) override {
+    printf("Top Org:\n");
+    VectPtr vect = candidate->ray[0];
+    //Energy = candidate->ray[0]->GetWaveEnergy();
+    candidate->Print_Me();
+    printf("\n");
+    printf("Score0:%24.17g, Score1:%24.17g\n", candidate->Score[0], candidate->Score[1]);
+  }
+  /* ********************************************************************** */
+  void Attach_StartingState(VectPtr StartingState0) override {
+  }
+};
+
+/* ********************************************************************** */
+class TesterEcho;// forward
+typedef TesterEcho *TesterEchoPtr;
+typedef std::vector<TesterEchoPtr> TesterEchoVec;
+class TesterEcho : public Tester {// evolve to create a vector with max wave energy (max changes, as we define it)
+public:
+  const static uint32_t RunningStart = 50;//0;//100;//2000;
+  const static uint32_t TestRuns = 100;
+  int External_Node_Number=-1, Total_Node_Number=-1;// deliberately crashing values
+  MatrixPtr model=nullptr;// behavior to imitate
+  int MxWdt, MxHgt;
+  int ModelIterations=10;
+  /* ********************************************************************** */
+  TesterEcho(int MxWdt0, int MxHgt0){
+    this->MxWdt=MxHgt0; this->MxHgt=MxHgt0;
+    External_Node_Number=1; Total_Node_Number=this->MxWdt;// External_Node_Number is the number of sensorymotor (I/O) nodes in the model
+    printf("\n");
+  }
+  /* ********************************************************************** */
+  ~TesterEcho(){
+    this->Clear_Model();
+  }
+  /* ********************************************************************** */
+  void Clear_Model() {
+    this->model = nullptr;
+  }
+  /* ********************************************************************** */
+  void Reset_Input() override {// once per generation
+  }
+  /* ********************************************************************** */
+  void Test(OrgPtr candidate) override {
+    VectPtr InVect = candidate->ray[0];
+    int NumCycles = InVect->len;
+    Vect OutSignal(NumCycles);
+    Vect ModelState(this->MxWdt);
+    double EnergyIn = 0, EnergyOut = 0;
+    int Iterations = 1;
+    EnergyIn = InVect->GetWaveEnergy();
+    double Score = 0;
+    for (int CycleCnt=0; CycleCnt<NumCycles; CycleCnt++) {// CycleCnt could be TCnt instead
+      ModelState.ray[0] = InVect->ray[CycleCnt];
+      model->Iterate(&ModelState, Iterations, &ModelState);
+      double SignalOut = ModelState.ray[0];
+      OutSignal.ray[CycleCnt] = SignalOut;
+    }
+    EnergyOut = OutSignal.GetWaveEnergy();
+    Score = EnergyOut - EnergyIn;// or EnergyOut/EnergyIn ?
+    Score = ActFun(Score);// use sigmoid to compress into -1 to +1 range.
+    candidate->Score[0]=Score;
+  }
+  /* ********************************************************************** */
+  void Print_Me() override {
+    //printf("TesterMxLoop class not implemented yet.\n");
+  }
+  /* ********************************************************************** */
+  void Print_Org(OrgPtr candidate) override {
+    printf("Top Org:\n");
+    VectPtr vect = candidate->ray[0];
+    //Energy = candidate->ray[0]->GetWaveEnergy();
+    candidate->Print_Me();
+    printf("\n");
+    printf("Score0:%24.17g, Score1:%24.17g\n", candidate->Score[0], candidate->Score[1]);
+  }
+  /* ********************************************************************** */
+  void Attach_StartingState(VectPtr StartingState0) override {
+  }
+  /* ********************************************************************** */
+  void Attach_Model(MatrixPtr model0) override {
+    this->Clear_Model();
+    this->model = model0;
+    this->MxWdt=this->model->wdt; this->MxHgt=this->model->hgt;
+    Total_Node_Number=this->MxWdt; External_Node_Number=Total_Node_Number/2;
   }
 };
 
