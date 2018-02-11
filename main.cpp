@@ -13,6 +13,63 @@ pop.evolve
 org = pop.bestorg; // NOT a model.  or could wobbletester's override output models?
 
 */
+
+// this_thread::yield example
+#include <thread>         // std::thread, std::this_thread::yield
+#include <atomic>         // std::atomic
+
+/* ********************************************************************** */
+
+void foo(){
+  std::cout << "foo running\n";
+  std::this_thread::sleep_for(std::chrono::seconds(1));
+  std::cout << "foo stopped\n";
+}
+
+void bar(int x){
+  std::cout << "bar running\n";
+  std::this_thread::sleep_for(std::chrono::seconds(1));
+  std::cout << "bar stopped\n";
+}
+
+int ThreadMain(){
+  std::thread first(foo);     // spawn new thread that calls foo()
+  std::thread second(bar,0);  // spawn new thread that calls bar(0)
+
+  std::cout << "main, foo and bar now execute concurrently...\n";
+
+  // synchronize threads:
+  first.join();  // pauses until first finishes
+  second.join(); // pauses until second finishes
+
+  std::cout << "foo and bar completed.\n";
+
+  return 0;
+}
+
+/* ********************************************************************** */
+std::atomic<bool> ready (false);
+
+void count1m(int id) {
+  while (!ready) { // wait until main() sets ready...
+    //printf("boogie!\n");
+    std::cout << "boogie!\n";
+    std::this_thread::yield();
+  }
+  for (volatile int i=0; i<1000000; ++i) {}
+  std::cout << id;
+}
+
+int YieldMain(){
+  std::thread threads[10];
+  std::cout << "race of 10 threads that count to 1 million:\n";
+  for (int i=0; i<10; ++i) threads[i]=std::thread(count1m,i);
+  ready = true; // go!
+  for (auto& th : threads) th.join();
+  std::cout << '\n';
+  return 0;
+}
+
 /* ********************************************************************** */
 int main() {
   cout << "Hello world!" << endl;
@@ -41,6 +98,13 @@ int main() {
   printf("randseed:%lld\n", (long long)timer);
   srand(timer);
   char name[256];
+
+  if (false){
+    //ThreadMain();
+    YieldMain();
+    return 0;
+  }
+
   if (false){// test stddev changes
     double measure;
     Stat stat0, stat1;

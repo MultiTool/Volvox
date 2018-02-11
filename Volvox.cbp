@@ -58,9 +58,7 @@
 		<Unit filename="Stats.hpp">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
-		<Unit filename="Tester.hpp">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
+		<Unit filename="Tester.hpp" />
 		<Unit filename="main.cpp" />
 		<Extensions>
 			<code_completion />

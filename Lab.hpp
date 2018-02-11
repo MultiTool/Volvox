@@ -12,7 +12,7 @@ class Lab {// Laboratory
 public:
   /* ********************************************************************** */
   void Run_Test() {
-    switch (2) {
+    switch (4) {
     case 0:
       Test0();
       break;
@@ -25,7 +25,25 @@ public:
     case 3:
       Test_Energy();
       break;
+    case 4:
+      Test_Thread();
+      break;
     }
+  }
+  /* ********************************************************************** */
+  void Test_Thread() {
+    MatrixPtr TopOrg = nullptr;
+    int OrgWdt = 64;//4;//16;//32;
+    int OrgHgt = 1;
+    printf("Test_Thread, OrgWdt:%i, OrgHgt:%i\n", OrgWdt, OrgHgt);
+    TesterThreadPtr ThreadTest = new TesterThread();
+    PopPtr pop = new Pop();
+    pop->Assign_Params(100, OrgWdt, OrgHgt, ThreadTest, /* MaxOrgGens */ 10000, 1, /* EvoStagnationLimit */ 30000);
+    pop->Evolve();
+    TopOrg = pop->CloneTopOrg();
+    delete pop;
+    delete ThreadTest;
+    delete TopOrg;
   }
   /* ********************************************************************** */
   void Test_Energy() {

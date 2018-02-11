@@ -1,5 +1,6 @@
 #ifndef TESTER_HPP_INCLUDED
 #define TESTER_HPP_INCLUDED
+#include <thread> // std::thread
 
 #include "Org.hpp"
 // #include "Model.hpp"
@@ -20,7 +21,10 @@ public:
   virtual ~Tester(){
   }
   /* ********************************************************************** */
-  virtual void Reset_Input() {
+  virtual void Generation_Start() {
+  }
+  /* ********************************************************************** */
+  virtual void Generation_Finish() {
   }
   /* ********************************************************************** */
   virtual void Test(OrgPtr candidate) {
@@ -64,7 +68,7 @@ public:
     for (int vcnt=0;vcnt<Num_Invecs;vcnt++){
       this->invec[vcnt] = new Vect(MxWdt);
     }
-    this->Reset_Input();
+    this->Scramble_Invecs();
     this->outvec0 = new Vect(MxHgt0);
     this->outvec1 = new Vect(MxHgt0);
   }
@@ -78,10 +82,17 @@ public:
     delete this->model;
   }
   /* ********************************************************************** */
-  void Reset_Input() override {
+  void Scramble_Invecs() {
     for (int vcnt=0;vcnt<Num_Invecs;vcnt++){
       this->invec[vcnt]->Rand_Init();// mutate 100%
     }
+  }
+  /* ********************************************************************** */
+  void Generation_Start() override {
+      //Scramble_Invecs();
+  }
+  /* ********************************************************************** */
+  void Generation_Finish() override {
   }
   /* ********************************************************************** */
   void Test(OrgPtr candidate) override {
@@ -177,8 +188,11 @@ public:
     } while (Mag<2.0);
   }
   /* ********************************************************************** */
-  void Reset_Input() override {// once per generation
+  void Scramble_StartingState() {
     this->StartingState->Rand_Init();
+  }
+  /* ********************************************************************** */
+  void Generation_Start() override {// once per generation
   }
   /* ********************************************************************** */
   void Test(OrgPtr candidate) override {
@@ -312,7 +326,7 @@ public:
     delete StartingState;
   }
   /* ********************************************************************** */
-  void Reset_Input() override {// once per generation
+  void Generation_Start() override {// once per generation
   }
   /* ********************************************************************** */
   void Test(OrgPtr candidate) override {
@@ -451,9 +465,15 @@ public:
     delete MacroNet;
   }
   /* ********************************************************************** */
-  void Reset_Input() override {// once per generation
+  void Scramble_Test() {
     Scramble_Models();
     this->Scramble_ModelStateSeed();
+  }
+  /* ********************************************************************** */
+  void Generation_Start() override {// once per generation
+    if (false){
+      Scramble_Test();
+    }
   }
   /* ********************************************************************** */
   void Test(OrgPtr candidate) override {
@@ -629,7 +649,7 @@ public:
   ~TesterVect(){
   }
   /* ********************************************************************** */
-  void Reset_Input() override {// once per generation
+  void Generation_Start() override {// once per generation
   }
   /* ********************************************************************** */
   void Test(OrgPtr candidate) override {
@@ -683,7 +703,7 @@ public:
     this->model = nullptr;
   }
   /* ********************************************************************** */
-  void Reset_Input() override {// once per generation
+  void Generation_Start() override {// once per generation
   }
   /* ********************************************************************** */
   void Test(OrgPtr candidate) override {
@@ -753,7 +773,61 @@ public:
     EnergyOut = OutSignal.GetWaveEnergy();
     Score = EnergyOut - EnergyIn;// or EnergyOut/EnergyIn ?
     printf("EnergyIn:%f, EnergyOut:%f\n", EnergyIn, EnergyOut);
-    OutSignal.Print_Me();
+    //OutSignal.Print_Me();
+  }
+};
+
+/* ********************************************************************** */
+class TesterThread;// forward
+typedef TesterThread *TesterThreadPtr;
+typedef std::vector<TesterThreadPtr> TesterThreadVec;
+class TesterThread : public Tester {// evolve to create a vector with max wave energy (max changes, as we define it)
+public:
+  /* ********************************************************************** */
+  TesterThread(){
+  }
+  /* ********************************************************************** */
+  ~TesterThread(){
+  }
+  /* ********************************************************************** */
+  void Clear_Model() {
+  }
+  /* ********************************************************************** */
+  void Generation_Start() override {// once per generation
+  }
+  /* ********************************************************************** */
+  void Generation_Finish() override {
+      // do all of our thread joining here
+  }
+  /* ********************************************************************** */
+  void Test(OrgPtr candidate) override {
+    std::thread branch(TestThread, this, candidate);
+    branch.join(); // pauses until branch finishes
+  }
+  /* ********************************************************************** */
+  void TestThread(OrgPtr candidate) {
+    VectPtr vect = candidate->ray[0];
+    vect->Clip_Me(1.0);// hacky. here we modify the Org's genome in a test.
+    double Range = vect->MaxLen();
+    double Energy;
+    Energy = vect->GetWaveEnergy()/((double)vect->len-1);// len-1 because we only measure differences between numbers, always one less.
+    Energy *= 0.5;
+    candidate->Score[0]=Energy;// to do: find a scoring system whose max is 1.0
+  }
+  /* ********************************************************************** */
+  void Print_Me() override {
+  }
+  /* ********************************************************************** */
+  void Print_Org(OrgPtr candidate) override {
+  }
+  /* ********************************************************************** */
+  void Profile_Model(MatrixPtr CurrentModel) override {
+  }
+  /* ********************************************************************** */
+  void Attach_StartingState(VectPtr StartingState0) override {
+  }
+  /* ********************************************************************** */
+  void Attach_Model(MatrixPtr model0) override {
   }
 };
 

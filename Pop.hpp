@@ -149,13 +149,12 @@ mutate children
   void Score_And_Sort() {
     uint32_t popsize = this->Forest.size();
     OrgPtr candidate;
-    if (false){
-      tester->Reset_Input();
-    }
+    tester->Generation_Start();
     for (uint32_t pcnt=0; pcnt<popsize; pcnt++) {
       candidate = Forest[pcnt];
       tester->Test(candidate);
     }
+    tester->Generation_Finish();
     Sort();
   }
   /* ********************************************************************** */
@@ -174,7 +173,7 @@ mutate children
       //printf("GenCnt:%4d, CurrentTopScore:%f, TopDigiScore:%f\n", this->GenCnt, CurrentTopScore, TopDigiScore);
       //printf("GenCnt:%4d, TopScore:%24.17g, TopDigiScore:%f, ModelStateMag:%f\n", this->GenCnt, CurrentTopScore, TopDigiScore, ModelStateMag);
       //printf("GenCnt:%4d, TopScore0:%24.17g, TopScore1:%24.17g\n", this->GenCnt, CurrentTopScore, TopDigiScore);// full resolution of double
-      //printf("GenCnt:%4d, TopScore0:%1.20g, TopScore1:%1.20g\n", this->GenCnt, CurrentTopScore, TopDigiScore);
+      printf("GenCnt:%4d, TopScore0:%1.20g, TopScore1:%1.20g\n", this->GenCnt, CurrentTopScore, TopDigiScore);
       if (false){
         printf("GenCnt:%4d, ", this->GenCnt);
         TopOrg->Print_Scores();
