@@ -1,11 +1,14 @@
 #ifndef TESTER_HPP_INCLUDED
 #define TESTER_HPP_INCLUDED
 #include <thread> // std::thread
+#include <atomic> // std::atomic, std::atomic_flag, ATOMIC_FLAG_INIT
 
 #include "Org.hpp"
 // #include "Model.hpp"
 #include "Cluster.hpp"
 // #include "TrainingSets.hpp"
+
+using namespace std;
 
 /* ********************************************************************** */
 class Tester;// forward
@@ -49,10 +52,10 @@ public:
 };
 
 /* ********************************************************************** */
-class TesterMx;// forward
-typedef TesterMx *TesterMxPtr;
-typedef std::vector<TesterMxPtr> TesterMxVec;
-class TesterMx : public Tester {// evolve to match an existing matrix
+class Tester_Mx;// forward
+typedef Tester_Mx *Tester_MxPtr;
+typedef std::vector<Tester_MxPtr> Tester_MxVec;
+class Tester_Mx : public Tester {// evolve to match an existing matrix
 public:
   MatrixPtr model;// alternate crucible
   VectPtr outvec0, outvec1;
@@ -61,7 +64,7 @@ public:
   VectPtr invec[Num_Invecs];
   int MxWdt, MxHgt;
   /* ********************************************************************** */
-  TesterMx(int MxWdt0, int MxHgt0){
+  Tester_Mx(int MxWdt0, int MxHgt0){
     this->MxWdt=MxHgt0; this->MxHgt=MxHgt0;
     this->model = new Matrix(MxWdt0, MxHgt0);
     this->model->Rand_Init();// mutate 100%
@@ -73,7 +76,7 @@ public:
     this->outvec1 = new Vect(MxHgt0);
   }
   /* ********************************************************************** */
-  ~TesterMx(){
+  ~Tester_Mx(){
     delete this->outvec1;
     delete this->outvec0;
     for (int vcnt=0;vcnt<Num_Invecs;vcnt++){
@@ -141,10 +144,10 @@ public:
 };
 
 /* ********************************************************************** */
-class TesterMxLoop;// forward
-typedef TesterMxLoop *TesterMxLoopPtr;
-typedef std::vector<TesterMxLoopPtr> TesterMxLoopVec;
-class TesterMxLoop : public Tester {// evolve to create a mirror of a continuous behavior
+class Tester_Mx_Loop;// forward
+typedef Tester_Mx_Loop *Tester_Mx_LoopPtr;
+typedef std::vector<Tester_Mx_LoopPtr> Tester_Mx_LoopVec;
+class Tester_Mx_Loop : public Tester {// evolve to create a mirror of a continuous behavior
 public:
   const static uint32_t RunningStart = 50;//0;//100;//2000;
   const static uint32_t TestRuns = 100;
@@ -155,7 +158,7 @@ public:
   VectPtr StartingState;
   double PerfectDigi;// maximum possible digital score
   /* ********************************************************************** */
-  TesterMxLoop(int MxWdt0, int MxHgt0){
+  Tester_Mx_Loop(int MxWdt0, int MxHgt0){
     this->MxWdt=MxHgt0; this->MxHgt=MxHgt0;
     this->model = this->model_internal = new Matrix(MxWdt0, MxHgt0);
     External_Node_Number=MxWdt0/2; Total_Node_Number=MxWdt0;
@@ -168,7 +171,7 @@ public:
     //Profile_Model(this->model);
   }
   /* ********************************************************************** */
-  ~TesterMxLoop(){
+  ~Tester_Mx_Loop(){
     delete StartingState;
     this->Clear_Model();
   }
@@ -254,7 +257,7 @@ public:
   }
   /* ********************************************************************** */
   void Print_Me() override {
-    //printf("TesterMxLoop class not implemented yet.\n");
+    //printf("Tester_Mx_Loop class not implemented yet.\n");
   }
   /* ********************************************************************** */
   void Print_Org(OrgPtr candidate) override {
@@ -304,10 +307,10 @@ public:
 };
 
 /* ********************************************************************** */
-class TesterMxWobble;// forward
-typedef TesterMxWobble *TesterMxWobblePtr;
-typedef std::vector<TesterMxWobblePtr> TesterMxWobbleVec;
-class TesterMxWobble : public Tester {// evolve to create models with greater variance in amplitude, to be more interesting
+class Tester_Mx_Wobble;// forward
+typedef Tester_Mx_Wobble *Tester_Mx_WobblePtr;
+typedef std::vector<Tester_Mx_WobblePtr> Tester_Mx_WobbleVec;
+class Tester_Mx_Wobble : public Tester {// evolve to create models with greater variance in amplitude, to be more interesting
 public:
   const static uint32_t RunningStart = 50;//0;//100;//2000;
   const static uint32_t TestRuns = 100;// 10
@@ -316,13 +319,13 @@ public:
   int MxWdt, MxHgt;
   VectPtr StartingState;
   /* ********************************************************************** */
-  TesterMxWobble(int MxWdt0, int MxHgt0){
+  Tester_Mx_Wobble(int MxWdt0, int MxHgt0){
     this->MxWdt=MxHgt0; this->MxHgt=MxHgt0;
     StartingState = new Vect(MxWdt0);
     StartingState->Rand_Init();
   }
   /* ********************************************************************** */
-  ~TesterMxWobble(){
+  ~Tester_Mx_Wobble(){
     delete StartingState;
   }
   /* ********************************************************************** */
@@ -371,7 +374,7 @@ public:
   }
   /* ********************************************************************** */
   void Print_Me() override {
-    //printf("TesterMxLoop class not implemented yet.\n");
+    //printf("Tester_Mx_Loop class not implemented yet.\n");
   }
   /* ********************************************************************** */
   void Print_Org(OrgPtr candidate) override {
@@ -416,10 +419,10 @@ public:
 };
 
 /* ********************************************************************** */
-class TesterNet;// forward
-typedef TesterNet *TesterNetPtr;
-typedef std::vector<TesterNetPtr> TesterNetVec;
-class TesterNet : public Tester {// evolve to create a backpropagation learning rule
+class Tester_Net;// forward
+typedef Tester_Net *Tester_NetPtr;
+typedef std::vector<Tester_NetPtr> Tester_NetVec;
+class Tester_Net : public Tester {// evolve to create a backpropagation learning rule
 public:
   ClusterPtr MacroNet;// crucible
   //const static uint32_t RunningStart = 1000;//100;//2000;
@@ -435,7 +438,7 @@ public:
   const static int Num_Invecs = 20;
   VectPtr StartingState;//Total_Node_Number);
   /* ********************************************************************** */
-  TesterNet(){
+  Tester_Net(){
     printf("PerfectDigi:%f, HCubeDims:%i\n", PerfectDigi, HCubeDims);
     StartingState = new Vect(Total_Node_Number);
     this->Scramble_ModelStateSeed();
@@ -459,7 +462,7 @@ public:
     printf("\n");
   }
   /* ********************************************************************** */
-  ~TesterNet(){
+  ~Tester_Net(){
     delete StartingState;
     Delete_Models();
     delete MacroNet;
@@ -542,7 +545,7 @@ model subset output then overwrites bpnet output, becomes input
   }
   /* ********************************************************************** */
   void Print_Me() override {
-    //printf("TesterNet class not implemented yet.\n");
+    //printf("Tester_Net class not implemented yet.\n");
   }
   /* ********************************************************************** */
   void Print_Org(OrgPtr candidate) override {
@@ -637,16 +640,16 @@ model subset output then overwrites bpnet output, becomes input
 };
 
 /* ********************************************************************** */
-class TesterVect;// forward
-typedef TesterVect *TesterVectPtr;
-typedef std::vector<TesterVectPtr> TesterVectVec;
-class TesterVect : public Tester {// evolve to create a vector with max wave energy (max changes, as we define it)
+class Tester_Vect;// forward
+typedef Tester_Vect *Tester_VectPtr;
+typedef std::vector<Tester_VectPtr> Tester_VectVec;
+class Tester_Vect : public Tester {// evolve to create a vector with max wave energy (max changes, as we define it)
 public:
   /* ********************************************************************** */
-  TesterVect(){
+  Tester_Vect(){
   }
   /* ********************************************************************** */
-  ~TesterVect(){
+  ~Tester_Vect(){
   }
   /* ********************************************************************** */
   void Generation_Start() override {// once per generation
@@ -663,7 +666,7 @@ public:
   }
   /* ********************************************************************** */
   void Print_Me() override {
-    //printf("TesterMxLoop class not implemented yet.\n");
+    //printf("Tester_Mx_Loop class not implemented yet.\n");
   }
   /* ********************************************************************** */
   void Print_Org(OrgPtr candidate) override {
@@ -680,10 +683,10 @@ public:
 };
 
 /* ********************************************************************** */
-class TesterEcho;// forward
-typedef TesterEcho *TesterEchoPtr;
-typedef std::vector<TesterEchoPtr> TesterEchoVec;
-class TesterEcho : public Tester {// evolve to create a vector with max wave energy (max changes, as we define it)
+class Tester_Echo;// forward
+typedef Tester_Echo *Tester_EchoPtr;
+typedef std::vector<Tester_EchoPtr> Tester_EchoVec;
+class Tester_Echo : public Tester {// evolve to create a vector with max wave energy (max changes, as we define it)
 public:
   const static uint32_t RunningStart = 50;//0;//100;//2000;
   const static uint32_t TestRuns = 100;
@@ -692,10 +695,10 @@ public:
   int MxWdt=-1, MxHgt=-1;
   int ModelIterations=10;
   /* ********************************************************************** */
-  TesterEcho(){
+  Tester_Echo(){
   }
   /* ********************************************************************** */
-  ~TesterEcho(){
+  ~Tester_Echo(){
     this->Clear_Model();
   }
   /* ********************************************************************** */
@@ -728,7 +731,7 @@ public:
   }
   /* ********************************************************************** */
   void Print_Me() override {
-    //printf("TesterMxLoop class not implemented yet.\n");
+    //printf("Tester_Mx_Loop class not implemented yet.\n");
   }
   /* ********************************************************************** */
   void Print_Org(OrgPtr candidate) override {
@@ -778,16 +781,19 @@ public:
 };
 
 /* ********************************************************************** */
-class TesterThread;// forward
-typedef TesterThread *TesterThreadPtr;
-typedef std::vector<TesterThreadPtr> TesterThreadVec;
-class TesterThread : public Tester {// evolve to create a vector with max wave energy (max changes, as we define it)
+class Tester_Thread;// forward
+typedef Tester_Thread *Tester_ThreadPtr;
+typedef std::vector<Tester_ThreadPtr> Tester_ThreadVec;
+class Tester_Thread : public Tester {// evolve to create a vector with max wave energy (max changes, as we define it)
 public:
+  std::atomic<int> Threads_Running;
+  //int Threads_Running;
   /* ********************************************************************** */
-  TesterThread(){
+  Tester_Thread(){
+    this->Threads_Running = 0;
   }
   /* ********************************************************************** */
-  ~TesterThread(){
+  ~Tester_Thread(){
   }
   /* ********************************************************************** */
   void Clear_Model() {
@@ -796,16 +802,38 @@ public:
   void Generation_Start() override {// once per generation
   }
   /* ********************************************************************** */
-  void Generation_Finish() override {
-      // do all of our thread joining here
+  void Generation_Finish() override {// do all of our thread joining here
+    //printf("Threads_Running:%i\n", this->Threads_Running);
+    cout << "Threads_Running In:" << this->Threads_Running << endl;
+    int bailcnt = 0;
+    while (this->Threads_Running.load()>0){
+      //printf("Threads_Running:%i\n", this->Threads_Running);
+      cout << "Threads_Running:" << this->Threads_Running << " ";
+      //std::this_thread::yield();
+      if (bailcnt>200){
+        cout << "Bail!" << endl;
+        exit(1);
+      }
+      bailcnt++;
+    }
+    if (this->Threads_Running<0){
+      cout << "Threads_Running:" << this->Threads_Running << "******************************************************\n";
+      exit(1);
+    }
+    cout << "Threads_Running Out:" << this->Threads_Running << endl;
+    //printf("Threads_Running Out:%i\n", this->Threads_Running);
   }
   /* ********************************************************************** */
   void Test(OrgPtr candidate) override {
-    std::thread branch(TestThread, this, candidate);
-    branch.join(); // pauses until branch finishes
+    //printf("Inc_Threads:%i\n", this->Threads_Running);
+    Inc_Threads();
+    std::thread branch(&Tester_Thread::Test_Async, this, candidate);
+    branch.detach();//branch.join(); // pauses until branch finishes
   }
   /* ********************************************************************** */
-  void TestThread(OrgPtr candidate) {
+  void Test_Async(OrgPtr candidate) {
+    //Inc_Threads();
+    cout << "ta0." << "";
     VectPtr vect = candidate->ray[0];
     vect->Clip_Me(1.0);// hacky. here we modify the Org's genome in a test.
     double Range = vect->MaxLen();
@@ -813,6 +841,18 @@ public:
     Energy = vect->GetWaveEnergy()/((double)vect->len-1);// len-1 because we only measure differences between numbers, always one less.
     Energy *= 0.5;
     candidate->Score[0]=Energy;// to do: find a scoring system whose max is 1.0
+    //cout << "Dec_Threads:" << this->Threads_Running << "\n";
+    this->Dec_Threads();
+    //scout << "Dec_Threads2:" << this->Threads_Running << "\n";
+    cout << "ta1." << "";
+  }
+  /* ********************************************************************** */
+  void Inc_Threads() {
+    this->Threads_Running++;
+  }
+  /* ********************************************************************** */
+  void Dec_Threads() {
+    this->Threads_Running--;
   }
   /* ********************************************************************** */
   void Print_Me() override {

@@ -38,6 +38,9 @@
 			<Add option="-std=c++0x" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<Linker>
+			<Add library="pthread" />
+		</Linker>
 		<Unit filename="Base.hpp" />
 		<Unit filename="Cluster.hpp" />
 		<Unit filename="Lab.hpp">
@@ -59,6 +62,7 @@
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="Tester.hpp" />
+		<Unit filename="Tester_Sounder.hpp" />
 		<Unit filename="main.cpp" />
 		<Extensions>
 			<code_completion />

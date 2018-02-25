@@ -26,7 +26,7 @@ public:
   OrgVec Forest; // for sorting
 
   TesterPtr tester=nullptr;//, tester_internal=nullptr;// crucible
-  //TesterMxWobblePtr wobble = nullptr;
+  //Tester_Mx_WobblePtr wobble = nullptr;
   uint32_t GenCnt;
   const double SurvivalRate=0.2;//0.02;//0.05;//0.5;
   const double MutRate=0.2;//0.5;//0.3;//0.8//0.6;//0.99;//
@@ -147,15 +147,19 @@ mutate children
   }
   /* ********************************************************************** */
   void Score_And_Sort() {
+    //cout << "Score_And_Sort begin" << "\n";
     uint32_t popsize = this->Forest.size();
     OrgPtr candidate;
     tester->Generation_Start();
     for (uint32_t pcnt=0; pcnt<popsize; pcnt++) {
       candidate = Forest[pcnt];
+      //printf("tester->Test(candidate)0\n");
       tester->Test(candidate);
+      //printf("tester->Test(candidate)1\n");
     }
     tester->Generation_Finish();
     Sort();
+    //cout << "Score_And_Sort end" << "\n";
   }
   /* ********************************************************************** */
   void Collect_Stats() {
@@ -169,12 +173,14 @@ mutate children
     AvgTopDigi=(AvgTopDigi*0.9) + (TopDigiScore*0.1);
     //if (this->GenCnt % 1 == 0){
     if (this->CurrentTopScore != PrevTopScore){
+    //if (true){
       //printf("GenCnt:%4d, CurrentTopScore:%f, AvgTopDigi:%f, TopDigiScore::%f\n", this->GenCnt, CurrentTopScore, AvgTopDigi, TopDigiScore);
       //printf("GenCnt:%4d, CurrentTopScore:%f, TopDigiScore:%f\n", this->GenCnt, CurrentTopScore, TopDigiScore);
       //printf("GenCnt:%4d, TopScore:%24.17g, TopDigiScore:%f, ModelStateMag:%f\n", this->GenCnt, CurrentTopScore, TopDigiScore, ModelStateMag);
       //printf("GenCnt:%4d, TopScore0:%24.17g, TopScore1:%24.17g\n", this->GenCnt, CurrentTopScore, TopDigiScore);// full resolution of double
-      printf("GenCnt:%4d, TopScore0:%1.20g, TopScore1:%1.20g\n", this->GenCnt, CurrentTopScore, TopDigiScore);
       if (false){
+        printf("GenCnt:%4d, TopScore0:%1.20g, TopScore1:%1.20g\n", this->GenCnt, CurrentTopScore, TopDigiScore);
+      } else {
         printf("GenCnt:%4d, ", this->GenCnt);
         TopOrg->Print_Scores();
         printf("\n");
@@ -252,8 +258,10 @@ mutate children
   }
   /* ********************************************************************** */
   void Sort() {
+    //cout << "Sort begin" << "\n";
     std::random_shuffle(Forest.begin(), Forest.end());//
     std::sort(Forest.begin(), Forest.end(), DescendingScore);
+    //cout << "Sort end" << "\n";
   }
   static bool AscendingScore(OrgPtr b0, OrgPtr b1) {
     return b0->Compare_Score(b1) > 0;

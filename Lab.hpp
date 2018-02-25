@@ -4,6 +4,7 @@
 
 using namespace std;
 
+#include "Tester_Sounder.hpp"
 #include "Pop.hpp"
 
 class Lab;// forward
@@ -12,7 +13,7 @@ class Lab {// Laboratory
 public:
   /* ********************************************************************** */
   void Run_Test() {
-    switch (4) {
+    switch (5) {
     case 0:
       Test0();
       break;
@@ -28,6 +29,9 @@ public:
     case 4:
       Test_Thread();
       break;
+    case 5:
+      Test_Sounder();
+      break;
     }
   }
   /* ********************************************************************** */
@@ -36,13 +40,19 @@ public:
     int OrgWdt = 64;//4;//16;//32;
     int OrgHgt = 1;
     printf("Test_Thread, OrgWdt:%i, OrgHgt:%i\n", OrgWdt, OrgHgt);
-    TesterThreadPtr ThreadTest = new TesterThread();
+    Tester_ThreadPtr ThreadTest = new Tester_Thread();
     PopPtr pop = new Pop();
     pop->Assign_Params(100, OrgWdt, OrgHgt, ThreadTest, /* MaxOrgGens */ 10000, 1, /* EvoStagnationLimit */ 30000);
     pop->Evolve();
     TopOrg = pop->CloneTopOrg();
     delete pop;
     delete ThreadTest;
+    delete TopOrg;
+  }
+  /* ********************************************************************** */
+  void Test_Sounder() {
+    MatrixPtr TopOrg = nullptr;
+    Evo_Sounder(TopOrg);
     delete TopOrg;
   }
   /* ********************************************************************** */
@@ -87,7 +97,7 @@ public:
   /* ********************************************************************** */
   void Evo_Model(int ModelSize, MatrixPtr &BestModel, VectPtr &StartingState) {// Evolve a matrix model toward 'interestingness'.
     printf("Evo_Model, ModelSize:%i\n", ModelSize);
-    TesterMxWobblePtr wobbletester = new TesterMxWobble(ModelSize, ModelSize);
+    Tester_Mx_WobblePtr wobbletester = new Tester_Mx_Wobble(ModelSize, ModelSize);
     if (StartingState == nullptr){// if no starting state, copy the default one and pass it outward.
       StartingState = wobbletester->StartingState->Clone_Me();
     } else {// if a starting state is predefined, use that.
@@ -115,7 +125,7 @@ public:
     StatPack->Init();
     printf("Evo_Mx, OrgSize:%i\n", OrgSize);
     //printf("Model Sanity0:\n"); model->Print_Me();
-    TesterMxLoopPtr tester=new TesterMxLoop(Org::DefaultWdt, Org::DefaultHgt);
+    Tester_Mx_LoopPtr tester=new Tester_Mx_Loop(Org::DefaultWdt, Org::DefaultHgt);
     tester->Attach_StartingState(StartingState);
     tester->Attach_Model(model);
     printf("MxLoop StartingState:\n"); tester->StartingState->Print_Me();
@@ -124,7 +134,7 @@ public:
     int Retries = 100;//16;
     int EvoStagnationLimit = 1500;//200;//
     pop->Assign_Params(100, OrgSize, tester, /* MaxOrgGens */ 10000, Retries, /* EvoStagnationLimit */ EvoStagnationLimit);
-    //printf("Model Sanity2:\n"); ((TesterMxLoopPtr)(pop->tester))->model->Print_Me();
+    //printf("Model Sanity2:\n"); ((Tester_Mx_LoopPtr)(pop->tester))->model->Print_Me();
     pop->Attach_Stats(StatPack);// error, first sample is not initialized.
     pop->Evolve();
     printf("\n"); StatPack->Print_Me();
@@ -133,11 +143,26 @@ public:
     delete StatPack;
   }
   /* ********************************************************************** */
+  void Evo_Sounder(MatrixPtr &TopOrg) {// Evolve a vector to be the highest-energy wave
+    int OrgWdt = 64;//4;//16;//32;
+    int OrgHgt = 1;
+    int PopSize = 100;
+    printf("Evo_Sounder, OrgWdt:%i, OrgHgt:%i\n", OrgWdt, OrgHgt);
+    Tester_SounderPtr SoundTester = new Tester_Sounder();
+    SoundTester->Assign_Pop_Size(PopSize, OrgWdt);
+    PopPtr pop = new Pop();
+    pop->Assign_Params(PopSize, OrgWdt, OrgHgt, SoundTester, /* MaxOrgGens */ 10000, 1, /* EvoStagnationLimit */ 30000);
+    pop->Evolve();
+    TopOrg = pop->CloneTopOrg();
+    delete pop;
+    delete SoundTester;
+  }
+  /* ********************************************************************** */
   void Evo_Vect(MatrixPtr &TopOrg) {// Evolve a vector to be the highest-energy wave
     int OrgWdt = 64;//4;//16;//32;
     int OrgHgt = 1;
     printf("Evo_Vect, OrgWdt:%i, OrgHgt:%i\n", OrgWdt, OrgHgt);
-    TesterVectPtr vectester = new TesterVect();
+    Tester_VectPtr vectester = new Tester_Vect();
     PopPtr pop = new Pop();
     pop->Assign_Params(100, OrgWdt, OrgHgt, vectester, /* MaxOrgGens */ 10000, 1, /* EvoStagnationLimit */ 30000);
     pop->Evolve();
@@ -152,7 +177,7 @@ public:
     int ModelWdt = model->wdt, ModelHgt = ModelWdt;
     printf("Evo_Echo, OrgWdt:%i, OrgHgt:%i, ModelWdt:%i, ModelHgt:%i\n", OrgWdt, OrgHgt, ModelWdt, ModelHgt);
     //printf("Evo_Echo, OrgWdt:%i, OrgHgt:%i\n", OrgWdt, OrgHgt);
-    TesterEchoPtr vectester = new TesterEcho();
+    Tester_EchoPtr vectester = new Tester_Echo();
     vectester->Attach_Model(model);
     PopPtr pop = new Pop();
     pop->Assign_Params(100, OrgWdt, OrgHgt, vectester, /* MaxOrgGens */ 10000, 1, /* EvoStagnationLimit */ 30000);
@@ -168,17 +193,17 @@ public:
     TesterPtr tester = nullptr;
     switch (1) {
     case 0:
-      tester=new TesterMx(Org::DefaultWdt, Org::DefaultHgt);
+      tester=new Tester_Mx(Org::DefaultWdt, Org::DefaultHgt);
       break;
     case 1:
-      tester=new TesterNet();
+      tester=new Tester_Net();
       break;
     case 2:
-      //tester=new TesterMxLoop(Org::DefaultWdt-2, Org::DefaultHgt-2);
-      tester=new TesterMxLoop(Org::DefaultWdt, Org::DefaultHgt);
+      //tester=new Tester_Mx_Loop(Org::DefaultWdt-2, Org::DefaultHgt-2);
+      tester=new Tester_Mx_Loop(Org::DefaultWdt, Org::DefaultHgt);
       break;
     case 3:
-      tester = new TesterMxWobble(Org::DefaultWdt, Org::DefaultHgt);
+      tester = new Tester_Mx_Wobble(Org::DefaultWdt, Org::DefaultHgt);
       break;
     default:break;
     }
@@ -195,7 +220,7 @@ public:
     1/(400^0.5) = 0.5, so if score is 90%, we would be 95% certain the results are between 85% and 95%.
 
     generate models;
-    tester = new TesterMxLoop();
+    tester = new Tester_Mx_Loop();
     pop.Attach(tester);
     for OrgSize (8 and 16) {
       StatObj = new Stats();
